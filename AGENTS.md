@@ -1,3 +1,10 @@
+# RistoApp — agent notes
+
+**The source of truth for stack, commands and conventions is [CLAUDE.md](./CLAUDE.md).**
+Read it first; this file only carries tooling-generated blocks that must stay in place.
+
+---
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 # This is NOT the Next.js you know

@@ -45,3 +45,6 @@ Thumbs.db
 # Next.js
 next-env.d.ts
 *.tsbuildinfo
+
+# Local scratch from bridge git operations (safe to delete)
+_to_delete/

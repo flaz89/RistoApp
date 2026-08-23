@@ -252,7 +252,7 @@ export default function Home() {
 
           <div className="ui">
             <div className="top">
-              <div className="wordmark">Risto<span className="dot">â¢</span>App</div>
+              <div className="wordmark">Risto<span className="dot">•</span>App</div>
               <div className="chip" id="chip"><span className="led"></span><span id="chipText">POSIZIONE OFF</span></div>
             </div>
 
@@ -261,7 +261,7 @@ export default function Home() {
             <div className="locate" id="locate">
               <span className="label">// sei a</span>
               <span className="place" id="place">Milano</span>
-              <span className="sub" id="coords">45.4642Â° N Â· 9.1900Â° E â Lombardia, IT</span>
+              <span className="sub" id="coords">45.4642° N · 9.1900° E — Lombardia, IT</span>
             </div>
 
             <div className="panel">
@@ -279,12 +279,9 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="foot"><b>Anteprima</b> Â· demo del look</div>
           </div>
         </div>
       </div>
-
-      <p className="note">Mockup del look. Attiva la posizione (pulsante) per vedere lo stato geolocalizzato; senza permesso resta la mappa del mondo con le cittÃ  del servizio.</p>
     </>
   );
 }

@@ -193,3 +193,18 @@
   @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; }
   }
+
+
+/* --- Real app layout: full-bleed and responsive (overrides the phone frame) --- */
+body { display: block; margin: 0; padding: 0; min-height: 100vh; min-height: 100dvh; }
+.stage { max-width: none; width: 100%; }
+.stage::before { display: none; }
+.screen {
+  aspect-ratio: auto;
+  min-height: 100vh; min-height: 100dvh;
+  border: 0; border-radius: 0; box-shadow: none;
+}
+.ui { min-height: 100vh; min-height: 100dvh; }
+@media (min-width: 820px) {
+  .ui { max-width: 600px; margin: 0 auto; padding: 48px 40px; }
+}

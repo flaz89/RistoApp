@@ -207,9 +207,11 @@ body { display: block; margin: 0; padding: 0; min-height: 100vh; min-height: 100
 .ui { min-height: 100vh; min-height: 100dvh; }
 @media (min-width: 820px) {
   .ui {
-    max-width: 600px; margin: 0 auto; padding: 48px 40px;
+    max-width: 1220px; margin: 0 auto; padding: 32px 40px;
     /* lift the panel off the bottom — leaves ~1/3 of space below it */
     padding-bottom: clamp(64px, 30vh, 340px);
     padding-bottom: clamp(64px, 30dvh, 340px);
   }
+  /* navbar (.top) spans the full 1220 width; content column stays narrow */
+  .locate, .panel { max-width: 600px; width: 100%; margin-left: auto; margin-right: auto; }
 }

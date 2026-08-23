@@ -260,7 +260,7 @@ export default function Home() {
             <div className="spacer"></div>
 
             <div className="locate" id="locate">
-              <span className="label">// sei a</span>
+              <span className="label">{'// sei a'}</span>
               <span className="place" id="place">Milano</span>
               <span className="sub" id="coords">45.4642° N · 9.1900° E — Lombardia, IT</span>
             </div>

@@ -14,6 +14,13 @@ export type GeoErrorReason =
   | 'position_unavailable' // no GPS / no network fix
   | 'timeout';             // the fix took too long
 
+/**
+ * What the browser currently thinks about location for this origin.
+ * 'unknown' means the Permissions API did not answer (older Safari): treat it
+ * like 'prompt', which is the safe assumption.
+ */
+export type GeoPermission = 'unknown' | 'prompt' | 'granted' | 'denied';
+
 export type GeolocationState = {
   status: GeoStatus;
   /** Precise coordinates, kept in the browser only (see `request`). */
@@ -58,8 +65,6 @@ const IDLE_STATE: GeolocationState = {
  */
 async function classifyDenial(): Promise<GeoErrorReason> {
   try {
-    // Not supported in every browser (Safari historically did not expose it),
-    // hence the try/catch rather than a feature test.
     const status = await navigator.permissions.query({ name: 'geolocation' });
     if (status.state === 'granted') return 'blocked_by_system';
   } catch {
@@ -72,9 +77,14 @@ async function classifyDenial(): Promise<GeoErrorReason> {
  * Owns the whole "where am I" flow: ask the browser, then ask our own API for a
  * human readable name. The UI only reads `status` and renders text for it — it
  * never talks to the Geolocation API or to the endpoint directly.
+ *
+ * It also exposes `permission`, which is what lets the UI stop guessing: a
+ * browser prompt can be spent exactly once per origin, so the page needs to
+ * know whether it still has that shot before deciding what to show.
  */
 export function useGeolocation() {
   const [state, setState] = useState<GeolocationState>(IDLE_STATE);
+  const [permission, setPermission] = useState<GeoPermission>('unknown');
 
   // A late browser callback must not write into an unmounted component.
   const alive = useRef(true);
@@ -164,5 +174,50 @@ export function useGeolocation() {
     );
   }, [fail]);
 
-  return { ...state, request, clear };
+  // Watch the permission for this origin, and keep watching: when the user
+  // answers the browser prompt the state changes under us, and the UI has to
+  // follow without a reload.
+  useEffect(() => {
+    let cancelled = false;
+    let subscription: PermissionStatus | null = null;
+
+    const sync = () => {
+      if (!cancelled && subscription) setPermission(subscription.state as GeoPermission);
+    };
+
+    (async () => {
+      try {
+        const status = await navigator.permissions.query({ name: 'geolocation' });
+        if (cancelled) return;
+        subscription = status;
+        setPermission(status.state as GeoPermission);
+        status.addEventListener('change', sync);
+      } catch {
+        // Older Safari has no geolocation entry in the Permissions API.
+        // 'unknown' is already the initial value, so there is nothing to do.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      subscription?.removeEventListener('change', sync);
+    };
+  }, []);
+
+  /**
+   * Already granted on a previous visit? Then locating costs no prompt and no
+   * interruption, so just do it. This is the whole difference between an app
+   * that nags and one that simply knows where you are.
+   *
+   * The ref makes it fire at most once per mount, so that dismissing the
+   * position (`clear`) does not immediately bounce back to located.
+   */
+  const autoRan = useRef(false);
+  useEffect(() => {
+    if (permission !== 'granted' || autoRan.current) return;
+    autoRan.current = true;
+    request();
+  }, [permission, request]);
+
+  return { ...state, permission, request, clear };
 }

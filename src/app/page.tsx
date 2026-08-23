@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { GeoErrorReason } from '@/lib/geo/useGeolocation';
 import { useGeolocation } from '@/lib/geo/useGeolocation';
@@ -293,6 +293,44 @@ export default function Home() {
   const located = geo.status === 'ready';
   const locating = geo.status === 'locating';
 
+  /**
+   * The "priming" dialog: our own explanation, shown before the browser's.
+   *
+   * The two dialogs are not equivalent. Ours costs nothing when refused — we
+   * can ask again tomorrow. The browser's can be spent exactly once per
+   * origin: a single reflexive "no" and the site can never prompt again, only
+   * send the user hunting through settings. So we let ours filter, and release
+   * the browser prompt only to someone who has already said yes to us.
+   */
+  const [priming, setPriming] = useState(false);
+  const allowButton = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!priming) return;
+    allowButton.current?.focus();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPriming(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [priming]);
+
+  const handleLocateClick = useCallback(() => {
+    if (located) {
+      geo.clear();
+      return;
+    }
+    // 'unknown' means the Permissions API stayed silent; treat it as 'prompt',
+    // because assuming we still have our one shot is the cautious guess.
+    if (geo.permission === 'prompt' || geo.permission === 'unknown') {
+      setPriming(true);
+      return;
+    }
+    // Granted: no prompt will appear. Denied: the call fails instantly and the
+    // hook produces the message that explains where to re-enable it.
+    geo.request();
+  }, [located, geo]);
+
   const chipText =
     locating ? 'RILEVO…'
     : located && geo.place ? `${geo.place.city.toUpperCase()}${geo.place.countryCode ? `, ${geo.place.countryCode}` : ''}`
@@ -302,6 +340,7 @@ export default function Home() {
   const buttonLabel =
     locating ? 'Ti sto cercando…'
     : located ? 'Posizione attiva'
+    : geo.permission === 'denied' ? 'Posizione bloccata'
     : 'Usa la mia posizione';
 
   const placeName = geo.place?.city ?? 'Sei qui';
@@ -341,14 +380,21 @@ export default function Home() {
               <h1>Un tavolo, <span className="hl">anche all&apos;ultimo minuto.</span></h1>
               <p className="lede">Scegli il tavolo che ti piace sulla piantina del locale, prenoti in un tocco e paghi dal telefono. I ristoranti migliori, vicino a te.</p>
               <div className="actions">
-                <button className="cta" onClick={() => { if (!located) geo.request(); }}>
+                {/*
+                  The primary CTA deliberately does NOT ask for location: a
+                  permission prompt must follow a gesture that declares it,
+                  otherwise a reflexive refusal burns the one prompt this origin
+                  gets. TODO: wire it to the restaurant list once that page exists.
+                */}
+                <button className="cta" type="button">
                   Trova un tavolo
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                 </button>
                 <button
                   className="ghost"
+                  type="button"
                   disabled={locating}
-                  onClick={() => (located ? geo.clear() : geo.request())}
+                  onClick={handleLocateClick}
                 >
                   <svg className="pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6.4-7-11a7 7 0 0 1 14 0c0 4.6-7 11-7 11Z"/><circle cx="12" cy="10" r="2.4"/></svg>
                   <span>{buttonLabel}</span>
@@ -360,6 +406,36 @@ export default function Home() {
             </div>
 
           </div>
+
+          {priming && (
+            <div className="primer" role="dialog" aria-modal="true" aria-labelledby="primerTitle">
+              <div className="primer-card">
+                <span className="label">{'// posizione'}</span>
+                <h2 id="primerTitle">Ti facciamo vedere i tavoli liberi vicino a te</h2>
+                <p>
+                  Serve solo a ordinare i ristoranti per distanza. Al nostro server la
+                  posizione arriva arrotondata al quartiere, e non la conserviamo.
+                </p>
+                <div className="primer-actions">
+                  <button
+                    className="cta"
+                    type="button"
+                    ref={allowButton}
+                    onClick={() => { setPriming(false); geo.request(); }}
+                  >
+                    Va bene, chiedi pure
+                  </button>
+                  <button className="ghost" type="button" onClick={() => setPriming(false)}>
+                    Non ora
+                  </button>
+                </div>
+                <p className="primer-note">
+                  Subito dopo sarà il browser a chiederti conferma. Puoi dire di no in
+                  entrambi i casi: l&apos;app continua a funzionare.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>

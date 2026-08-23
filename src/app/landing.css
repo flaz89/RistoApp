@@ -226,3 +226,39 @@ body { display: block; margin: 0; padding: 0; min-height: 100vh; min-height: 100
   color: #C98C7A;
 }
 .ghost:disabled { opacity: .55; cursor: progress; }
+
+/* --- Priming dialog: our own ask, shown before the browser's one-shot prompt --- */
+.primer {
+  position: absolute; inset: 0; z-index: 20;
+  display: grid; place-items: center;
+  padding: 24px;
+  background: rgba(4, 8, 7, 0.72);
+  backdrop-filter: blur(6px);
+  animation: primer-in .22s ease-out;
+}
+@keyframes primer-in { from { opacity: 0; } to { opacity: 1; } }
+
+.primer-card {
+  width: 100%; max-width: 420px;
+  padding: 26px 24px 22px;
+  border: 1px solid var(--glass-line);
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(23, 34, 30, 0.96), rgba(11, 17, 15, 0.96));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+.primer-card .label {
+  display: block; margin-bottom: 10px;
+  font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--ink-3);
+}
+.primer-card h2 {
+  margin: 0 0 10px;
+  font-family: "Baloo 2", system-ui, sans-serif; font-weight: 700;
+  font-size: 21px; line-height: 1.25; color: var(--ink);
+}
+.primer-card p {
+  margin: 0; font-family: "Manrope", sans-serif;
+  font-size: 14px; line-height: 1.55; color: var(--ink-2);
+}
+.primer-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 14px; }
+.primer-actions .cta { flex: 1 1 auto; }
+.primer-note { font-size: 12px !important; color: var(--ink-3) !important; }

@@ -41,6 +41,7 @@ export default function Home() {
       let landDots: number[][] = [];   // [x, y, glow]  glow = closeness to a service city (0..1)
       let localDots: number[][] = [];  // simulated local street-map for the located state
       function buildDots() {
+        const GR = Math.max(40, W * 0.035);
         const cityPts = CITIES.map((c) => project(c.lon, c.lat));
         landDots = [];
         for (let i = 0; i < LAND_PACKED.length; i += 2) {
@@ -49,7 +50,7 @@ export default function Home() {
           let g = 0;
           for (const [cx, cy] of cityPts) {
             const d = Math.hypot(x - cx, y - cy);
-            if (d < 30) g = Math.max(g, 1 - d / 30);
+            if (d < GR) g = Math.max(g, 1 - d / GR);
           }
           landDots.push([x, y, g]);
         }
@@ -119,8 +120,8 @@ export default function Home() {
         for (const d of landDots) {
           const g = d[2];
           if (g > 0.03) {
-            ctx.fillStyle = `rgba(43,232,142,${g * (0.12 + 0.6 * slow)})`;
-            ctx.beginPath(); ctx.arc(d[0], d[1], 1.35, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = `rgba(43,232,142,${g * (0.2 + 0.62 * slow)})`;
+            ctx.beginPath(); ctx.arc(d[0], d[1], 1.7, 0, Math.PI * 2); ctx.fill();
           }
         }
 

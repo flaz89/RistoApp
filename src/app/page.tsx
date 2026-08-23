@@ -22,7 +22,12 @@ type MapControls = {
 
 const GEO_ERROR_TEXT: Record<GeoErrorReason, string> = {
   unsupported: 'Il tuo browser non supporta la geolocalizzazione.',
-  permission_denied: 'Permesso negato. Puoi riattivarlo dalle impostazioni del browser.',
+  insecure_context:
+    'La geolocalizzazione richiede HTTPS. Apri il sito su https:// oppure su http://localhost.',
+  permission_denied:
+    'Permesso negato. Puoi riattivarlo dalle impostazioni del sito nel browser.',
+  blocked_by_system:
+    'Il sito ha il permesso, ma il sistema lo blocca. Su macOS: Impostazioni di Sistema → Privacy e sicurezza → Localizzazione, e attiva il tuo browser.',
   position_unavailable: 'Non riusciamo a rilevare la posizione in questo momento.',
   timeout: 'Ci sta mettendo troppo. Riprova.',
 };

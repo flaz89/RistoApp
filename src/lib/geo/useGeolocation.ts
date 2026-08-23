@@ -7,8 +7,10 @@ import type { GeoPlace } from './types';
 export type GeoStatus = 'idle' | 'locating' | 'ready' | 'error';
 
 export type GeoErrorReason =
-  | 'unsupported'          // the browser has no Geolocation API (or no HTTPS)
-  | 'permission_denied'    // the user said no
+  | 'unsupported'          // the browser has no Geolocation API at all
+  | 'insecure_context'     // served over plain http on a non-localhost origin
+  | 'permission_denied'    // the user said no to THIS site
+  | 'blocked_by_system'    // the site is allowed, something above the browser is not
   | 'position_unavailable' // no GPS / no network fix
   | 'timeout';             // the fix took too long
 
@@ -43,6 +45,30 @@ const IDLE_STATE: GeolocationState = {
 };
 
 /**
+ * Tell apart the two very different things that both surface as
+ * PERMISSION_DENIED.
+ *
+ * The browser only reports its own answer, but it is not the only gatekeeper:
+ * on macOS and Windows the OS has a location switch per application, and when
+ * that one is off the browser is refused before it can even ask us. From the
+ * page both look identical — except that the Permissions API still reports the
+ * *site* permission as 'granted'. Site granted + denied result therefore means
+ * the block sits above the browser, and telling the user to fiddle with site
+ * settings would send them chasing the wrong switch.
+ */
+async function classifyDenial(): Promise<GeoErrorReason> {
+  try {
+    // Not supported in every browser (Safari historically did not expose it),
+    // hence the try/catch rather than a feature test.
+    const status = await navigator.permissions.query({ name: 'geolocation' });
+    if (status.state === 'granted') return 'blocked_by_system';
+  } catch {
+    // Unknown: fall back to the safe, more common explanation.
+  }
+  return 'permission_denied';
+}
+
+/**
  * Owns the whole "where am I" flow: ask the browser, then ask our own API for a
  * human readable name. The UI only reads `status` and renders text for it — it
  * never talks to the Geolocation API or to the endpoint directly.
@@ -68,9 +94,25 @@ export function useGeolocation() {
     setState(IDLE_STATE);
   }, []);
 
+  const fail = useCallback((reason: GeoErrorReason) => {
+    if (!alive.current) return;
+    setState({ ...IDLE_STATE, status: 'error', reason });
+  }, []);
+
   const request = useCallback(() => {
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      setState({ ...IDLE_STATE, status: 'error', reason: 'unsupported' });
+      fail('unsupported');
+      return;
+    }
+
+    /**
+     * Geolocation is a "powerful feature": browsers only expose it in a secure
+     * context. https:// and http://localhost qualify; http://192.168.x.x (the
+     * dev server opened from another device on the LAN) does not, and the
+     * refusal looks exactly like a denied permission.
+     */
+    if (!window.isSecureContext) {
+      fail('insecure_context');
       return;
     }
 
@@ -107,19 +149,20 @@ export function useGeolocation() {
         if (!alive.current || controller.signal.aborted) return;
         setState({ status: 'ready', coords, place, reason: null });
       },
-      (error) => {
-        if (!alive.current) return;
+      async (error) => {
+        // The browser's own wording is the only clue about what really refused
+        // us, and it never reaches the UI — keep it in the console for us.
+        console.warn('[geo] getCurrentPosition failed', error.code, error.message);
 
-        const reason: GeoErrorReason =
-          error.code === error.PERMISSION_DENIED ? 'permission_denied'
-          : error.code === error.TIMEOUT ? 'timeout'
-          : 'position_unavailable';
-
-        setState({ ...IDLE_STATE, status: 'error', reason });
+        if (error.code === error.PERMISSION_DENIED) {
+          fail(await classifyDenial());
+          return;
+        }
+        fail(error.code === error.TIMEOUT ? 'timeout' : 'position_unavailable');
       },
       POSITION_OPTIONS,
     );
-  }, []);
+  }, [fail]);
 
   return { ...state, request, clear };
 }

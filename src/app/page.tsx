@@ -24,8 +24,10 @@ const GEO_ERROR_TEXT: Record<GeoErrorReason, string> = {
   unsupported: 'Il tuo browser non supporta la geolocalizzazione.',
   insecure_context:
     'La geolocalizzazione richiede HTTPS. Apri il sito su https:// oppure su http://localhost.',
+  // Once denied, the browser will never prompt again for this origin: the only
+  // way back is the site settings, so the message has to say where they are.
   permission_denied:
-    'Permesso negato. Puoi riattivarlo dalle impostazioni del sito nel browser.',
+    'Il browser ha memorizzato un rifiuto e non lo richiederà più. Riattiva la posizione per questo sito: Safari → Impostazioni → Siti web → Posizione; Chrome → icona nella barra indirizzi → Posizione.',
   blocked_by_system:
     'Il sito ha il permesso, ma il sistema lo blocca. Su macOS: Impostazioni di Sistema → Privacy e sicurezza → Localizzazione, e attiva il tuo browser.',
   position_unavailable: 'Non riusciamo a rilevare la posizione in questo momento.',

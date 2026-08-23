@@ -1,0 +1,43 @@
+# ---- Dipendenze ----
+node_modules/
+.pnp
+.pnp.js
+.yarn/
+
+# ---- Build e output ----
+dist/
+build/
+.next/
+out/
+.turbo/
+.vercel/
+
+# ---- SEGRETI: la ragione principale di questo file ----
+# Le chiavi non finiscono MAI su GitHub. Solo .env.example (senza valori) va versionato.
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+*.pem
+
+# ---- Supabase ----
+# Lo schema (migrations/) VA versionato. Questi sono stato locale ed effimero.
+supabase/.branches/
+supabase/.temp/
+supabase/logs/
+
+# ---- Log e cache ----
+*.log
+npm-debug.log*
+yarn-error.log*
+.cache/
+coverage/
+
+# ---- Sistema operativo ed editor ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp

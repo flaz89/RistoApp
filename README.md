@@ -1,23 +1,25 @@
 # RistoApp
 
-Prenotazione tavoli last-minute con piantina interattiva del locale, ordine e
-pagamento al tavolo, e gamification a livelli per i clienti.
+Last-minute table booking on an interactive floor plan that mirrors the real
+venue, in-app ordering with table-side payment, and a level-based loyalty
+system for guests.
 
-## Stato
+## Status
 
-Fase 1: webapp responsive. Backend su Supabase (Postgres + auth + storage +
-realtime). Obiettivo futuro: app nativa dedicata (Flutter).
+Phase 1: responsive web app (desktop + mobile). Backend on Supabase
+(Postgres + auth + storage + realtime). Future goal: a dedicated native app
+(Flutter).
 
-## Struttura
+## Structure
 
-- `supabase/migrations/` — schema del database in SQL versionato (fonte di verità)
-- `CLAUDE.md` — stack, comandi e convenzioni di progetto
+- `supabase/migrations/` — database schema as versioned SQL (source of truth)
+- `CLAUDE.md` — stack, commands, and project conventions
 
-## Avvio
+## Getting started
 
-Da compilare dopo lo scaffolding del frontend.
+To be filled in after the frontend scaffold.
 
-## Configurazione
+## Configuration
 
-Copia `.env.example` in `.env.local` e inserisci le chiavi di Supabase e Stripe.
-I segreti non vanno mai committati.
+Copy `.env.example` to `.env.local` and add your Supabase and Stripe keys.
+Secrets are never committed.

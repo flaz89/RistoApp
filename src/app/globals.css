@@ -1,26 +1,70 @@
 @import "tailwindcss";
 
+/**
+ * Design tokens — the single source of truth for the look of RistoApp.
+ *
+ * A token is a named design decision. Declaring it inside Tailwind's `@theme`
+ * does two jobs at once: Tailwind generates the matching utilities
+ * (`bg-accent`, `text-ink-2`, `font-display`...) AND emits the value as a CSS
+ * variable, so hand written CSS can use `var(--color-accent)` too. One
+ * declaration, two ways to spend it, one place to change it.
+ *
+ * They are CSS variables rather than SCSS ones on purpose: SCSS variables are
+ * compiled away, these survive in the browser. That is what will let a theme
+ * switch — or a per-restaurant palette — happen without rebuilding anything.
+ */
+@theme {
+  /* Surfaces, from the page ground up to the raised glass panels. */
+  --color-page:     #070B0A;
+  --color-screen-1: #0E1613;
+  --color-screen-2: #080C0B;
+  --color-glass:    rgba(20, 30, 27, 0.55);
+  --color-line:     rgba(160, 200, 185, 0.12);
+
+  /* Text, from primary down to the quietest label. */
+  --color-ink:   #ECF4F0;
+  --color-ink-2: #8EA39A;
+  --color-ink-3: #56675F;
+
+  /* The accent gradient. Used sparingly: it means "this is the action". */
+  --color-accent:   #2BE88E;
+  --color-accent-2: #10B7A0;
+
+  /* Font families. The variables come from next/font in layout.tsx, which
+     serves them from our own domain instead of a render blocking @import. */
+  --font-display: var(--font-baloo), ui-rounded, system-ui, sans-serif;
+  --font-sans:    var(--font-manrope), system-ui, sans-serif;
+  --font-mono:    var(--font-jetbrains), ui-monospace, monospace;
+}
+
+/**
+ * Aliases for landing.css, written before the tokens existed. Keeping them
+ * means that file did not have to be rewritten, while the tokens above stay
+ * the only place a colour is actually decided.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  color-scheme: dark;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --page:      var(--color-page);
+  --screen-1:  var(--color-screen-1);
+  --screen-2:  var(--color-screen-2);
+  --glass:     var(--color-glass);
+  --glass-line: var(--color-line);
+  --ink:       var(--color-ink);
+  --ink-2:     var(--color-ink-2);
+  --ink-3:     var(--color-ink-3);
+  --accent:    var(--color-accent);
+  --accent-2:  var(--color-accent-2);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --ground:      #06090800;
+  --accent-soft: rgba(43, 232, 142, 0.14);
+  --land:        rgba(150, 176, 166, 0.16);
+  --grid:        rgba(120, 150, 140, 0.06);
+  --radius:      30px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
 }

@@ -1029,6 +1029,7 @@ export type Database = {
           email: string
           id: string
           latitude: number | null
+          location: unknown
           longitude: number | null
           name: string
           owner_id: string
@@ -1053,6 +1054,7 @@ export type Database = {
           email: string
           id?: string
           latitude?: number | null
+          location?: unknown
           longitude?: number | null
           name: string
           owner_id: string
@@ -1077,6 +1079,7 @@ export type Database = {
           email?: string
           id?: string
           latitude?: number | null
+          location?: unknown
           longitude?: number | null
           name?: string
           owner_id?: string
@@ -1126,6 +1129,24 @@ export type Database = {
       is_restaurant_member: {
         Args: { target_restaurant: string }
         Returns: boolean
+      }
+      nearby_restaurants: {
+        Args: {
+          in_lat: number
+          in_limit?: number
+          in_lon: number
+          in_radius_m?: number
+        }
+        Returns: {
+          address_line: string
+          avg_spend_cents: number
+          city: string
+          cover_photo_url: string
+          distance_m: number
+          id: string
+          name: string
+          slug: string
+        }[]
       }
     }
     Enums: {

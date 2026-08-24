@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { GeoErrorReason } from '@/lib/geo/useGeolocation';
@@ -51,6 +52,11 @@ export default function Home() {
     const canvas = document.getElementById('map') as HTMLCanvasElement;
     const ctx = canvas.getContext('2d')!;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Canvas text cannot use a CSS class, and next/font hides the real family
+    // name behind a hash, so read it off the design token.
+    const MONO = getComputedStyle(document.documentElement)
+      .getPropertyValue('--font-mono').trim() || 'ui-monospace, monospace';
 
     const CITIES = [
       { name: 'Milano', lon: 9.19, lat: 45.46, me: true },
@@ -183,7 +189,7 @@ export default function Home() {
       ctx.restore();
 
       // service-city markers — all clearly visible
-      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.font = `10px ${MONO}`;
       ctx.textBaseline = 'middle';
       for (const c of CITIES) {
         const [x, y] = project(c.lon, c.lat);
@@ -200,7 +206,7 @@ export default function Home() {
 
       // scattered mono coordinate ticks for the techy feel
       ctx.fillStyle = 'rgba(120,150,140,0.28)';
-      ctx.font = '9px "JetBrains Mono", monospace';
+      ctx.font = `9px ${MONO}`;
       ctx.fillText('00.1101', W * 0.12, mapTop + mapH * 0.22);
       ctx.fillText('01.10', W * 0.7, mapTop + mapH * 0.12);
       ctx.fillText('00.1', W * 0.62, mapTop + mapH * 0.75);
@@ -384,12 +390,12 @@ export default function Home() {
                   The primary CTA deliberately does NOT ask for location: a
                   permission prompt must follow a gesture that declares it,
                   otherwise a reflexive refusal burns the one prompt this origin
-                  gets. TODO: wire it to the restaurant list once that page exists.
+                  gets. It navigates instead, and the list page asks there.
                 */}
-                <button className="cta" type="button">
+                <Link className="cta" href="/ristoranti">
                   Trova un tavolo
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </button>
+                </Link>
                 <button
                   className="ghost"
                   type="button"

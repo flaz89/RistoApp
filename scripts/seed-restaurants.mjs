@@ -94,6 +94,20 @@ const TORINO = [
 
 const RESTAURANTS = [...MILANO, ...TORINO];
 
+/**
+ * Placeholder logos for a handful of places, on purpose not for all of them:
+ * the list has to look right both with and without one. Real logos will be
+ * uploaded by the owner and will point at object storage instead of /public.
+ */
+const LOGOS = {
+  'caffe-reale': '/logos/caffe-reale.svg',
+  'osteria-del-quadrilatero': '/logos/quadrilatero.svg',
+  'trattoria-san-salvario': '/logos/san-salvario.svg',
+  'il-balcone-sul-po': '/logos/balcone-sul-po.svg',
+  'ai-due-campanili': '/logos/due-campanili.svg',
+  'osteria-bocca-buona': '/logos/bocca-buona.svg',
+};
+
 /** Create the auth user, or find it if a previous run already made it. */
 async function ensureUser(owner) {
   const created = await supabase.auth.admin.createUser({
@@ -147,6 +161,7 @@ async function main() {
     latitude: r.lat,
     longitude: r.lon,
     avg_spend_cents: r.spend,
+    logo_url: LOGOS[r.slug] ?? null,
     // Only active restaurants are visible through RLS to an anonymous visitor,
     // so seeding them as 'draft' would produce an empty, puzzling search.
     status: 'active',

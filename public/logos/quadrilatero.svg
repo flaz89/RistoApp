@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="OQ">
+  <rect width="64" height="64" rx="14" fill="#1E3A34"/>
+  <rect x="10" y="10" width="44" height="44" rx="8" fill="none" stroke="#7FD4B0" stroke-width="1.5"/>
+  <text x="32" y="41" font-family="Georgia, serif" font-size="24" font-weight="700"
+        text-anchor="middle" fill="#F3FBF7">OQ</text>
+</svg>

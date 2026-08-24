@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="OB">
+  <rect width="64" height="64" rx="14" fill="#1F3D2B"/>
+  <path d="M14 34 Q32 52 50 34" fill="none" stroke="#8FE0AE" stroke-width="1.5"/>
+  <text x="32" y="41" font-family="Georgia, serif" font-size="24" font-weight="700"
+        text-anchor="middle" fill="#F3FBF7">OB</text>
+</svg>

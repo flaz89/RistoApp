@@ -61,18 +61,38 @@ const supabase = createClient(url, serviceRoleKey, {
 const OWNERS = [
   { email: 'owner.rossi@ristoapp.test', firstName: 'Giulia', lastName: 'Rossi', phone: '+39 02 1111111' },
   { email: 'owner.bianchi@ristoapp.test', firstName: 'Marco', lastName: 'Bianchi', phone: '+39 02 2222222' },
+  { email: 'owner.ferrero@ristoapp.test', firstName: 'Chiara', lastName: 'Ferrero', phone: '+39 011 3333333' },
 ];
 
-const RESTAURANTS = [
+// Milan, around the Duomo.
+const MILANO = [
   { owner: 0, name: 'Trattoria del Naviglio Piccolo', slug: 'trattoria-naviglio-piccolo', address: 'Ripa di Porta Ticinese 41', postal: '20143', lat: 45.4520, lon: 9.1750, spend: 3200 },
-  { owner: 0, name: 'Osteria Bocca Buona',            slug: 'osteria-bocca-buona',        address: 'Via Fiori Chiari 12',        postal: '20121', lat: 45.4720, lon: 9.1870, spend: 4500 },
-  { owner: 0, name: "Il Cortile d'Isola",             slug: 'il-cortile-isola',           address: 'Via Pastrengo 8',            postal: '20159', lat: 45.4870, lon: 9.1880, spend: 2800 },
-  { owner: 0, name: 'Cucina Porta Romana',            slug: 'cucina-porta-romana',        address: 'Corso Lodi 22',              postal: '20135', lat: 45.4520, lon: 9.2050, spend: 3800 },
-  { owner: 1, name: 'Bistrot Lambretta',              slug: 'bistrot-lambretta',          address: 'Via Conte Rosso 15',         postal: '20134', lat: 45.4850, lon: 9.2380, spend: 2600 },
-  { owner: 1, name: 'Ai Due Campanili',               slug: 'ai-due-campanili',           address: 'Via Torino 30',              postal: '20123', lat: 45.4625, lon: 9.1830, spend: 5200 },
-  { owner: 1, name: 'Sempione Bistrò',                slug: 'sempione-bistro',            address: 'Viale Elvezia 4',            postal: '20154', lat: 45.4750, lon: 9.1690, spend: 4100 },
-  { owner: 1, name: 'La Corte di Città Studi',        slug: 'la-corte-citta-studi',       address: 'Via Pascoli 55',             postal: '20133', lat: 45.4780, lon: 9.2280, spend: 3000 },
-];
+  { owner: 0, name: 'Osteria Bocca Buona',            slug: 'osteria-bocca-buona',        address: 'Via Fiori Chiari 12',      postal: '20121', lat: 45.4720, lon: 9.1870, spend: 4500 },
+  { owner: 0, name: "Il Cortile d'Isola",             slug: 'il-cortile-isola',           address: 'Via Pastrengo 8',          postal: '20159', lat: 45.4870, lon: 9.1880, spend: 2800 },
+  { owner: 0, name: 'Cucina Porta Romana',            slug: 'cucina-porta-romana',        address: 'Corso Lodi 22',            postal: '20135', lat: 45.4520, lon: 9.2050, spend: 3800 },
+  { owner: 1, name: 'Bistrot Lambretta',              slug: 'bistrot-lambretta',          address: 'Via Conte Rosso 15',       postal: '20134', lat: 45.4850, lon: 9.2380, spend: 2600 },
+  { owner: 1, name: 'Ai Due Campanili',               slug: 'ai-due-campanili',           address: 'Via Torino 30',            postal: '20123', lat: 45.4625, lon: 9.1830, spend: 5200 },
+  { owner: 1, name: 'Sempione Bistrò',                slug: 'sempione-bistro',            address: 'Viale Elvezia 4',          postal: '20154', lat: 45.4750, lon: 9.1690, spend: 4100 },
+  { owner: 1, name: 'La Corte di Città Studi',        slug: 'la-corte-citta-studi',       address: 'Via Pascoli 55',           postal: '20133', lat: 45.4780, lon: 9.2280, spend: 3000 },
+].map((r) => ({ ...r, city: 'Milano' }));
+
+// Turin, spread across the districts on purpose: a couple in the centre so the
+// 1 km filter returns something, and Lingotto / Barriera far enough out that
+// widening the radius visibly changes the list.
+const TORINO = [
+  { owner: 2, name: 'Caffè Reale',              slug: 'caffe-reale',              address: 'Piazza Castello 20',       postal: '10122', lat: 45.0705, lon: 7.6868, spend: 4800 },
+  { owner: 2, name: 'Osteria del Quadrilatero', slug: 'osteria-del-quadrilatero', address: 'Via Sant\'Agostino 12',    postal: '10122', lat: 45.0760, lon: 7.6820, spend: 3600 },
+  { owner: 2, name: 'Trattoria San Salvario',   slug: 'trattoria-san-salvario',   address: 'Via Baretti 20',           postal: '10125', lat: 45.0555, lon: 7.6810, spend: 3100 },
+  { owner: 2, name: 'Bistrot Vanchiglia',       slug: 'bistrot-vanchiglia',       address: 'Via Vanchiglia 18',        postal: '10124', lat: 45.0700, lon: 7.6990, spend: 2900 },
+  { owner: 2, name: 'La Crocetta in Tavola',    slug: 'la-crocetta-in-tavola',    address: 'Via Marco Polo 33',        postal: '10129', lat: 45.0610, lon: 7.6630, spend: 4200 },
+  { owner: 2, name: 'Il Balcone sul Po',        slug: 'il-balcone-sul-po',        address: 'Via Villa della Regina 4', postal: '10131', lat: 45.0620, lon: 7.7010, spend: 5500 },
+  { owner: 1, name: 'Cit Turin Cucina',         slug: 'cit-turin-cucina',         address: 'Corso Francia 55',         postal: '10138', lat: 45.0740, lon: 7.6570, spend: 3400 },
+  { owner: 1, name: 'Officina Lingotto',        slug: 'officina-lingotto',        address: 'Via Nizza 230',            postal: '10126', lat: 45.0300, lon: 7.6650, spend: 2700 },
+  { owner: 1, name: 'Barriera Bistrò',          slug: 'barriera-bistro',          address: 'Corso Palermo 90',         postal: '10154', lat: 45.0930, lon: 7.7000, spend: 2400 },
+  { owner: 1, name: 'Santa Rita Trattoria',     slug: 'santa-rita-trattoria',     address: 'Via Tripoli 120',          postal: '10137', lat: 45.0430, lon: 7.6450, spend: 2900 },
+].map((r) => ({ ...r, city: 'Torino' }));
+
+const RESTAURANTS = [...MILANO, ...TORINO];
 
 /** Create the auth user, or find it if a previous run already made it. */
 async function ensureUser(owner) {
@@ -121,7 +141,7 @@ async function main() {
     phone: '+39 02 0000000',
     email: `info@${r.slug}.test`,
     address_line: r.address,
-    city: 'Milano',
+    city: r.city,
     postal_code: r.postal,
     country_code: 'IT',
     latitude: r.lat,
@@ -138,8 +158,10 @@ async function main() {
     .select('slug');
   if (error) throw error;
 
-  console.log(`\n${data.length} restaurants seeded in Milan.`);
-  console.log('Try it:  select * from nearby_restaurants(45.4642, 9.19, 5000, 10);');
+  const byCity = RESTAURANTS.reduce((acc, r) => ({ ...acc, [r.city]: (acc[r.city] ?? 0) + 1 }), {});
+  console.log(`\n${data.length} restaurants seeded:`, byCity);
+  console.log('Milano:  select * from nearby_restaurants(45.4642, 9.1900, 5000, 10);');
+  console.log('Torino:  select * from nearby_restaurants(45.0705, 7.6868, 5000, 10);');
 }
 
 main().catch((error) => {

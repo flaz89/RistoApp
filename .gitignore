@@ -48,3 +48,6 @@ next-env.d.ts
 
 # Local scratch from bridge git operations (safe to delete)
 _to_delete/
+
+# Documenti di business (modelli costi, strategia): restano solo in locale
+business/

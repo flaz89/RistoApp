@@ -148,8 +148,9 @@ export default function RestaurantsPage() {
 
           {restaurants?.length === 0 && (
             <p className="mt-8 text-ink-2">
-              Nessun locale entro {formatDistance(radius)} da {cityLabel}. Prova ad
-              allargare il raggio.
+              {radius === RADII[RADII.length - 1].meters
+                ? `Non siamo ancora attivi intorno a ${cityLabel}. Ci stiamo lavorando.`
+                : `Nessun locale entro ${formatDistance(radius)} da ${cityLabel}. Prova ad allargare il raggio.`}
             </p>
           )}
 

@@ -26,9 +26,12 @@
   --color-ink-2: #8EA39A;
   --color-ink-3: #56675F;
 
-  /* The accent gradient. Used sparingly: it means "this is the action". */
-  --color-accent:   #2BE88E;
-  --color-accent-2: #10B7A0;
+  /* The accent gradient. Used sparingly: it means "this is the action".
+     Matches the logo orange (#F67700, sampled from public/logos/CuriusLogoLanding_2KB.png):
+     --color-accent is a lighter/warmer tint used as the gradient's bright end,
+     --color-accent-2 is the logo's own hue, used as the deeper end. */
+  --color-accent:   #FFA53D;
+  --color-accent-2: #F67700;
 
   /* Font families. The variables come from next/font in layout.tsx, which
      serves them from our own domain instead of a render blocking @import. */
@@ -57,7 +60,7 @@
   --accent-2:  var(--color-accent-2);
 
   --ground:      #06090800;
-  --accent-soft: rgba(43, 232, 142, 0.14);
+  --accent-soft: rgba(246, 119, 0, 0.14);
   --land:        rgba(150, 176, 166, 0.16);
   --grid:        rgba(120, 150, 140, 0.06);
   --radius:      30px;

@@ -166,12 +166,12 @@ export default function Home() {
       ctx.fillStyle = 'rgba(158,186,174,0.32)';
       for (const d of landDots) { ctx.beginPath(); ctx.arc(d[0], d[1], 1.0, 0, Math.PI * 2); ctx.fill(); }
 
-      // green glow on dots near a service city — slow intermittence (~6s cycle)
+      // accent-colored glow on dots near a service city — slow intermittence (~6s cycle)
       const slow = reduce ? 0.55 : (Math.sin(t * 0.016) * 0.5 + 0.5);
       for (const d of landDots) {
         const g = d[2];
         if (g > 0.03) {
-          ctx.fillStyle = `rgba(43,232,142,${g * (0.2 + 0.62 * slow)})`;
+          ctx.fillStyle = `rgba(246,119,0,${g * (0.2 + 0.62 * slow)})`;
           ctx.beginPath(); ctx.arc(d[0], d[1], 1.7, 0, Math.PI * 2); ctx.fill();
         }
       }
@@ -194,7 +194,7 @@ export default function Home() {
       for (const c of CITIES) {
         const [x, y] = project(c.lon, c.lat);
         ctx.beginPath(); ctx.arc(x, y, 6.5, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(43,232,142,0.45)'; ctx.lineWidth = 1.2; ctx.stroke();
+        ctx.strokeStyle = 'rgba(246,119,0,0.45)'; ctx.lineWidth = 1.2; ctx.stroke();
         ctx.beginPath(); ctx.arc(x, y, 3.3, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(222,242,234,0.95)'; ctx.fill();
         ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = 6;
@@ -231,27 +231,27 @@ export default function Home() {
       const breathe = reduce ? 0.6 : (Math.sin(t * 0.05) * 0.5 + 0.5);
       const R = 32 + breathe * 10;
       const g = ctx.createRadialGradient(cx, cy, 2, cx, cy, R);
-      g.addColorStop(0, 'rgba(43,232,142,0.5)');
-      g.addColorStop(0.5, 'rgba(43,232,142,0.16)');
-      g.addColorStop(1, 'rgba(43,232,142,0)');
+      g.addColorStop(0, 'rgba(246,119,0,0.5)');
+      g.addColorStop(0.5, 'rgba(246,119,0,0.16)');
+      g.addColorStop(1, 'rgba(246,119,0,0)');
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
 
       if (!reduce) for (let k = 0; k < 2; k++) {
         const ph = ((t * 0.01) + k * 0.5) % 1;
         ctx.beginPath(); ctx.arc(cx, cy, 10 + ph * 40, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(43,232,142,${0.45 * (1 - ph)})`; ctx.lineWidth = 1.4; ctx.stroke();
+        ctx.strokeStyle = `rgba(246,119,0,${0.45 * (1 - ph)})`; ctx.lineWidth = 1.4; ctx.stroke();
       }
 
       // crosshair + tracking point
-      ctx.strokeStyle = 'rgba(43,232,142,0.55)'; ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(246,119,0,0.55)'; ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.moveTo(cx - 17, cy); ctx.lineTo(cx - 7, cy);
       ctx.moveTo(cx + 7, cy); ctx.lineTo(cx + 17, cy);
       ctx.moveTo(cx, cy - 17); ctx.lineTo(cx, cy - 7);
       ctx.moveTo(cx, cy + 7); ctx.lineTo(cx, cy + 17);
       ctx.stroke();
-      ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(43,232,142,0.8)'; ctx.lineWidth = 1.5; ctx.stroke();
-      ctx.beginPath(); ctx.arc(cx, cy, 4.4, 0, Math.PI * 2); ctx.fillStyle = '#4CF0A2'; ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, 8, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(246,119,0,0.8)'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, 4.4, 0, Math.PI * 2); ctx.fillStyle = '#F09E4C'; ctx.fill();
       ctx.beginPath(); ctx.arc(cx, cy, 1.7, 0, Math.PI * 2); ctx.fillStyle = '#EAFFF4'; ctx.fill();
 
       ctx.restore();
@@ -367,7 +367,8 @@ export default function Home() {
 
           <div className="ui">
             <div className="top">
-              <div className="wordmark">Risto<span className="dot">•</span>App</div>
+              {/* eslint-disable-next-line @next/next/no-img-element -- tiny static wordmark asset, next/image is overkill */}
+              <img className="wordmark-logo" src="/logos/CuriusLogoLanding_2KB.png" alt="RistoApp" />
               <div className={located ? 'chip live' : 'chip'}>
                 <span className="led"></span>
                 <span>{chipText}</span>

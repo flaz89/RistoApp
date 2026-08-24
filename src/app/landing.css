@@ -22,7 +22,7 @@
   .stage::before {
     content: "";
     position: absolute; inset: -8% -20% 6% -20%;
-    background: radial-gradient(60% 45% at 50% 30%, rgba(43,232,142,0.14), transparent 70%);
+    background: radial-gradient(60% 45% at 50% 30%, rgba(246,119,0,0.14), transparent 70%);
     filter: blur(10px); z-index: 0; pointer-events: none;
   }
 
@@ -53,16 +53,11 @@
 
   /* header */
   .top { display: flex; align-items: center; justify-content: space-between; }
-  .wordmark {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 26px;
-    letter-spacing: 0.2px;
-    line-height: 1;
-    color: var(--ink);
-    display: inline-flex; align-items: baseline; gap: 1px;
+  .wordmark-logo {
+    height: 28px;
+    width: auto;
+    display: block;
   }
-  .wordmark .dot { color: var(--accent); }
   .chip {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -80,7 +75,7 @@
     box-shadow: none;
     transition: background .4s, box-shadow .4s;
   }
-  .chip.live { color: var(--accent); border-color: rgba(43,232,142,0.35); }
+  .chip.live { color: var(--accent); border-color: rgba(246,119,0,0.35); }
   .chip.live .led { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
 
   .spacer { flex: 1; }
@@ -134,14 +129,14 @@
   .cta {
     appearance: none; border: 0; cursor: pointer; text-decoration: none;
     font-family: var(--font-sans); font-weight: 700; font-size: 16px;
-    color: #04231a;
+    color: #251403; /* dark warm brown for contrast on the orange gradient, same relation as the old #04231a on green */
     background: linear-gradient(100deg, var(--accent), var(--accent-2));
     padding: 16px; border-radius: 16px;
     display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-    box-shadow: 0 12px 30px -10px rgba(43,232,142,0.55);
+    box-shadow: 0 12px 30px -10px rgba(246,119,0,0.55);
     transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
   }
-  .cta:hover { transform: translateY(-1px); box-shadow: 0 18px 36px -12px rgba(43,232,142,0.6); }
+  .cta:hover { transform: translateY(-1px); box-shadow: 0 18px 36px -12px rgba(246,119,0,0.6); }
   .cta:active { transform: translateY(0); filter: saturate(1.1); }
   .cta svg { width: 18px; height: 18px; }
 

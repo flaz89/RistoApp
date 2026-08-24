@@ -18,12 +18,35 @@
  */
 import { createClient } from '@supabase/supabase-js';
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+/**
+ * The project URL must be the ORIGIN only. The dashboard also shows endpoint
+ * URLs ending in /rest/v1; passing one of those makes the client build a
+ * doubled path and the gateway answers "Invalid path specified in request
+ * URL", which names nothing. Checking here turns that into a real sentence.
+ *
+ * This duplicates src/lib/supabase/env.ts on purpose: a plain .mjs script
+ * cannot import the TypeScript module, and a build step just to seed a
+ * database would cost more than these ten lines.
+ */
+function projectUrl() {
+  const raw = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  if (!raw) throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL (run through `npm run seed`, which loads .env.local).');
 
-if (!url || !serviceRoleKey) {
-  console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.');
-  console.error('Run through `npm run seed`, which loads .env.local.');
+  const parsed = new URL(raw);
+  if (parsed.pathname !== '/' || parsed.search) {
+    throw new Error(
+      `NEXT_PUBLIC_SUPABASE_URL must be the project origin only, but it ends with "${parsed.pathname}${parsed.search}". ` +
+      `Use ${parsed.origin} — in .env.local and in the Vercel project settings.`,
+    );
+  }
+  return parsed.origin;
+}
+
+const url = projectUrl();
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+
+if (!serviceRoleKey) {
+  console.error('Missing SUPABASE_SERVICE_ROLE_KEY.');
   process.exit(1);
 }
 

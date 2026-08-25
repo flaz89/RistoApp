@@ -31,12 +31,10 @@ export class ProviderError extends Error {}
  *
  * @throws ProviderError when the provider is unreachable, slow or broken.
  */
-export async function reverseGeocode(
-  lat: number,
-  lon: number,
-  language = 'it',
-): Promise<GeoPlace | null> {
-  const url = `${PROVIDER_ENDPOINT}?latitude=${lat}&longitude=${lon}&localityLanguage=${language}`;
+export async function reverseGeocode(lat: number, lon: number): Promise<GeoPlace | null> {
+  // Locality names come back localized to Italian; make that a choice when a
+  // second language actually needs one, not before.
+  const url = `${PROVIDER_ENDPOINT}?latitude=${lat}&longitude=${lon}&localityLanguage=it`;
 
   let response: Response;
   try {

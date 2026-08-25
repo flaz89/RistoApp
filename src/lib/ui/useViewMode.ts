@@ -13,16 +13,14 @@ const DEFAULT_MODE: ViewMode = 'list';
  *
  * The naive version — `useState` seeded from localStorage — breaks here,
  * because this page is rendered on the server too, where there is no
- * localStorage. The server would produce one HTML and the browser a different
- * first render, and React calls that a hydration mismatch.
+ * localStorage: the server produces one HTML and the browser a different first
+ * render, and React calls that a hydration mismatch. `useSyncExternalStore`
+ * exists for exactly this: a snapshot for the browser, a separate one for the
+ * server. The preference then applies right after hydration.
  *
- * `useSyncExternalStore` is built exactly for this: it takes a snapshot for the
- * browser and a separate one for the server, so the two sides are honest with
- * each other. The preference then applies right after hydration.
- *
- * Reading localStorage is also wrapped in try/catch throughout: in a private
- * window, or with site data blocked, merely touching it throws. A preference
- * is a convenience — it must never be able to break the page.
+ * Reading localStorage is wrapped in try/catch: in a private window, or with
+ * site data blocked, merely touching it throws, and a preference must never be
+ * able to break the page.
  */
 const listeners = new Set<() => void>();
 let snapshot: ViewMode | null = null;
@@ -36,22 +34,10 @@ function readStorage(): ViewMode {
   }
 }
 
+/** No cross-tab sync: a subscribe that only tracks in-page changes is enough. */
 function subscribe(onChange: () => void): () => void {
   listeners.add(onChange);
-
-  // 'storage' fires when ANOTHER tab writes the key: two tabs open on the site
-  // stay in agreement instead of drifting apart.
-  const onStorageEvent = (event: StorageEvent) => {
-    if (event.key !== STORAGE_KEY) return;
-    snapshot = null;
-    onChange();
-  };
-  window.addEventListener('storage', onStorageEvent);
-
-  return () => {
-    listeners.delete(onChange);
-    window.removeEventListener('storage', onStorageEvent);
-  };
+  return () => { listeners.delete(onChange); };
 }
 
 /** Cached because React may ask for the snapshot several times per render. */

@@ -70,12 +70,35 @@ export function RestaurantsMap({
   const [map, setMap] = useState<MaplibreMap | null>(null);
 
   // Restaurants only carry pins in the restaurants category; retail clears them.
+  // Only rows with finite coordinates become pins: MapLibre throws on NaN, and a
+  // row can be missing them (e.g. before migration 0005 is applied). The list
+  // still shows every restaurant — coordinates are a map concern only.
   // Memoized so its identity is stable — otherwise the fit effect below would
   // re-run every render on a fresh array.
   const pins = useMemo(
-    () => (category === 'restaurants' ? restaurants ?? [] : []),
+    () =>
+      category === 'restaurants'
+        ? (restaurants ?? []).filter(
+            (r) => Number.isFinite(r.longitude) && Number.isFinite(r.latitude),
+          )
+        : [],
     [category, restaurants],
   );
+
+  // If rows arrive without coordinates, say so once: it almost always means the
+  // RPC is still returning the pre-0005 shape (migration not applied, or the
+  // PostgREST schema cache is stale).
+  useEffect(() => {
+    if (category !== 'restaurants' || !restaurants) return;
+    const missing = restaurants.filter(
+      (r) => !Number.isFinite(r.longitude) || !Number.isFinite(r.latitude),
+    ).length;
+    if (missing > 0) {
+      console.warn(
+        `[map] ${missing}/${restaurants.length} ristoranti senza coordinate: la migrazione 0005 è applicata e lo schema PostgREST ricaricato?`,
+      );
+    }
+  }, [category, restaurants]);
 
   const active = useMemo(
     () => pins.find((r) => r.id === activeId) ?? null,
@@ -85,10 +108,14 @@ export function RestaurantsMap({
   // Init once. The initial centre is the user; later moves are the fit effect.
   useEffect(() => {
     if (!containerRef.current) return;
+    const center: [number, number] =
+      Number.isFinite(userCoords.lon) && Number.isFinite(userCoords.lat)
+        ? [userCoords.lon, userCoords.lat]
+        : [7.6869, 45.0703]; // Torino, only if coordinates are somehow invalid
     const m = new MaplibreMap({
       container: containerRef.current,
       style: STYLE,
-      center: [userCoords.lon, userCoords.lat],
+      center,
       zoom: 13,
       attributionControl: { compact: true },
       // Keep it a map, not a flight simulator: no pitch/rotate on a list screen.
@@ -108,6 +135,7 @@ export function RestaurantsMap({
   // is nothing to frame. Extra bottom padding leaves room for the sheet.
   useEffect(() => {
     if (!map) return;
+    if (!Number.isFinite(userCoords.lon) || !Number.isFinite(userCoords.lat)) return;
     const userLngLat: LngLatLike = [userCoords.lon, userCoords.lat];
 
     if (pins.length === 0) {

@@ -79,7 +79,7 @@ export function RestaurantsMap({
     () =>
       category === 'restaurants'
         ? (restaurants ?? []).filter(
-            (r) => Number.isFinite(r.longitude) && Number.isFinite(r.latitude),
+            (r) => Number.isFinite(Number(r.longitude)) && Number.isFinite(Number(r.latitude)),
           )
         : [],
     [category, restaurants],
@@ -91,7 +91,7 @@ export function RestaurantsMap({
   useEffect(() => {
     if (category !== 'restaurants' || !restaurants) return;
     const missing = restaurants.filter(
-      (r) => !Number.isFinite(r.longitude) || !Number.isFinite(r.latitude),
+      (r) => !Number.isFinite(Number(r.longitude)) || !Number.isFinite(Number(r.latitude)),
     ).length;
     if (missing > 0) {
       console.warn(
@@ -122,6 +122,7 @@ export function RestaurantsMap({
       pitchWithRotate: false,
       dragRotate: false,
     });
+    m.on('error', (e) => console.error('[map]', (e && e.error && e.error.message) || e));
     m.on('load', () => setMap(m));
     return () => {
       m.remove();
@@ -164,7 +165,7 @@ export function RestaurantsMap({
 
       {map &&
         pins.map((r) => (
-          <MapMarker key={r.id} map={map} lngLat={[r.longitude, r.latitude]}>
+          <MapMarker key={r.id} map={map} lngLat={[Number(r.longitude), Number(r.latitude)]}>
             <RestaurantPin
               name={r.name}
               active={r.id === activeId}
@@ -176,7 +177,7 @@ export function RestaurantsMap({
       {map && active && (
         <MapMarker
           map={map}
-          lngLat={[active.longitude, active.latitude]}
+          lngLat={[Number(active.longitude), Number(active.latitude)]}
           anchor="bottom"
           offset={[0, -30]}
         >

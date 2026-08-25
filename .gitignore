@@ -51,3 +51,7 @@ _to_delete/
 
 # Documenti di business (modelli costi, strategia): restano solo in locale
 business/
+
+# MapLibre worker files copied into public/ by pre(dev|build) (derived, not source)
+/public/maplibre-gl-worker.mjs
+/public/maplibre-gl-shared.mjs

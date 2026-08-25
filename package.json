@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "node --env-file=.env.local scripts/seed-restaurants.mjs"
+    "seed": "node --env-file=.env.local scripts/seed-restaurants.mjs",
+    "copy-map-worker": "cp node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs node_modules/maplibre-gl/dist/maplibre-gl-shared.mjs public/",
+    "predev": "npm run copy-map-worker",
+    "prebuild": "npm run copy-map-worker"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

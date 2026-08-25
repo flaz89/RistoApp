@@ -7,10 +7,19 @@ import {
   LngLatBounds,
   Map as MaplibreMap,
   Marker,
+  setWorkerUrl,
   type LngLatLike,
   type StyleSpecification,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+
+// Point MapLibre's tile worker at files served from /public. In Turbopack dev
+// the worker URL MapLibre derives from import.meta.url resolves to a path Next
+// answers with the app's HTML, so the worker script fails to parse
+// ("Unexpected token '<'"), tiles never decode, and the canvas stays blank grey.
+// public/maplibre-gl-worker.mjs (+ its -shared sibling) are copied there by the
+// pre(dev|build) npm script, so they always match the installed version.
+setWorkerUrl('/maplibre-gl-worker.mjs');
 
 import { formatDistance, formatSpend } from '@/lib/format';
 import type { NearbyRestaurant } from '@/lib/restaurants/nearby';

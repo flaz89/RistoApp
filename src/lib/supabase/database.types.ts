@@ -1024,13 +1024,13 @@ export type Database = {
           city: string
           country_code: string
           cover_photo_url: string | null
-          logo_url: string | null
           created_at: string
           description: string | null
           email: string
           id: string
           latitude: number | null
           location: unknown
+          logo_url: string | null
           longitude: number | null
           name: string
           owner_id: string
@@ -1050,13 +1050,13 @@ export type Database = {
           city: string
           country_code?: string
           cover_photo_url?: string | null
-          logo_url?: string | null
           created_at?: string
           description?: string | null
           email: string
           id?: string
           latitude?: number | null
           location?: unknown
+          logo_url?: string | null
           longitude?: number | null
           name: string
           owner_id: string
@@ -1076,13 +1076,13 @@ export type Database = {
           city?: string
           country_code?: string
           cover_photo_url?: string | null
-          logo_url?: string | null
           created_at?: string
           description?: string | null
           email?: string
           id?: string
           latitude?: number | null
           location?: unknown
+          logo_url?: string | null
           longitude?: number | null
           name?: string
           owner_id?: string
@@ -1145,9 +1145,11 @@ export type Database = {
           avg_spend_cents: number
           city: string
           cover_photo_url: string
-          logo_url: string
           distance_m: number
           id: string
+          latitude: number
+          logo_url: string
+          longitude: number
           name: string
           slug: string
         }[]

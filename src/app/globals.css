@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
 /**
- * Design tokens — the single source of truth for the look of RistoApp.
+ * Design tokens — the single source of truth for the look of Curius
+ * (codename tecnico: RistoApp, finché non si esegue il rename del repo).
  *
  * A token is a named design decision. Declaring it inside Tailwind's `@theme`
  * does two jobs at once: Tailwind generates the matching utilities
@@ -14,24 +15,32 @@
  * switch — or a per-restaurant palette — happen without rebuilding anything.
  */
 @theme {
-  /* Surfaces, from the page ground up to the raised glass panels. */
-  --color-page:     #070B0A;
-  --color-screen-1: #0E1613;
-  --color-screen-2: #080C0B;
-  --color-glass:    rgba(20, 30, 27, 0.55);
-  --color-line:     rgba(160, 200, 185, 0.12);
+  /* Surfaces, from the page ground up to the raised glass panels.
+     Warm charcoal family: chosen so the orange accent (--color-accent-2) is
+     the ONLY warm signal on screen. A brown or espresso ground would compete
+     with the orange and attenuate both. See brand_identity.md § Ink. */
+  --color-page:     #0E0C0A;
+  --color-screen-1: #1A1613;
+  --color-screen-2: #231F1B;
+  --color-glass:    rgba(35, 30, 25, 0.55);
+  --color-line:     rgba(242, 236, 224, 0.09);
 
-  /* Text, from primary down to the quietest label. */
-  --color-ink:   #ECF4F0;
-  --color-ink-2: #8EA39A;
-  --color-ink-3: #56675F;
+  /* Text, from primary down to the quietest label.
+     Warm ivory / warm greys: same warm hint as the surfaces, so text
+     "belongs" to the ground rather than sitting on it as a cold overlay. */
+  --color-ink:   #F2ECE0;
+  --color-ink-2: #C4BCAF;
+  --color-ink-3: #7F776A;
 
   /* The accent gradient. Used sparingly: it means "this is the action".
      Matches the logo orange (#F67700, sampled from public/logos/CuriusLogoLanding_2KB.png):
      --color-accent is a lighter/warmer tint used as the gradient's bright end,
-     --color-accent-2 is the logo's own hue, used as the deeper end. */
+     --color-accent-2 is the logo's own hue, used as the deeper end.
+     --color-warm is the cream secondary that breaks up the pure orange on
+     extended surfaces (splash panels, cards, illustrated moments). */
   --color-accent:   #FFA53D;
   --color-accent-2: #F67700;
+  --color-warm:     #EDD7B8;
 
   /* Font families. The variables come from next/font in layout.tsx, which
      serves them from our own domain instead of a render blocking @import. */
@@ -58,11 +67,12 @@
   --ink-3:     var(--color-ink-3);
   --accent:    var(--color-accent);
   --accent-2:  var(--color-accent-2);
+  --warm:      var(--color-warm);
 
   --ground:      #06090800;
   --accent-soft: rgba(246, 119, 0, 0.14);
-  --land:        rgba(150, 176, 166, 0.16);
-  --grid:        rgba(120, 150, 140, 0.06);
+  --land:        rgba(238, 214, 178, 0.14);
+  --grid:        rgba(180, 165, 140, 0.06);
   --radius:      30px;
 }
 

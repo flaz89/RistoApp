@@ -1,0 +1,163 @@
+/*
+ * Hero (landing v2) — sezione 1.
+ * Il proverbio "Chi tardi arriva, MALE alloggia" si trasforma in "...MEGLIO
+ * alloggia": la parola male viene sbarrata, sfuma, e meglio scende dall'alto.
+ * In fondo al pannello arancione una fascia di nuvole ne copre la linea di
+ * base e sfuma l'arancione: da lì (nella sezione mappa) pioveranno i loghi.
+ *
+ * Colori/font: tutti dai token @theme in globals.css. Solo l'inchiostro scuro
+ * su arancione e i due arancioni del gradiente sono locali alla hero.
+ */
+.hero {
+  --hero-ink: #2E2B28;
+  --hero-orange: var(--color-accent-2);
+  --hero-orange-deep: #C55E00;
+  --hero-cream: var(--color-warm);
+  --hero-strike: #BA1A1A;
+  --cloud-h: 110px; /* fissa: la fascia di nuvole non cambia tra mobile e desktop */
+  position: relative;
+  background: var(--hero-ink);
+  overflow: visible;
+}
+
+.hero__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(16px, 4vw, 26px) clamp(20px, 6vw, 48px);
+}
+.hero__wm { display: inline-flex; align-items: center; }
+.hero__wm-logo { height: clamp(26px, 7vw, 34px); width: auto; display: block; }
+.hero__signin {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(13px, 3.4vw, 14px);
+  color: var(--hero-ink);
+  background: var(--color-warm);
+  padding: 8px 16px;
+  border-radius: 12px;
+  text-decoration: none;
+}
+
+.hero__panel {
+  position: relative;
+  margin-top: clamp(6px, 2vw, 16px);
+  padding: clamp(40px, 9vw, 84px) 20px clamp(96px, 20vw, 168px);
+  background: var(--hero-orange);
+  border-radius: 50% 50% 0 0 / clamp(48px, 12vw, 96px) clamp(48px, 12vw, 96px) 0 0;
+  overflow: visible;
+}
+.hero__inner {
+  position: relative;
+  z-index: 2;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero__quote {
+  font-family: var(--font-sans);
+  font-weight: 200;
+  color: var(--hero-ink);
+  font-size: clamp(38px, 10.5vw, 58px);
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+.flip {
+  position: relative;
+  display: inline-block;
+  min-width: 3.1em;
+  height: 1.05em;
+  vertical-align: bottom;
+}
+.flip__w { position: absolute; left: 50%; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.flip__male   {font-family: var(--font-display); font-weight: 800; color: var(--hero-ink); animation: maleFade 2.2s ease 0.4s both; }
+.flip__meglio {font-family: var(--font-display); font-weight: 800; color: var(--hero-cream); opacity: 0; animation: meglioDrop 2.2s cubic-bezier(.2,.75,.2,1) 0.4s both; }
+.strike {
+  position: absolute; left: -5%; right: -5%; height: 0.14em;
+  border-radius: 0.1em; background: var(--hero-strike);
+  transform-origin: left center; transform: scaleX(0);
+}
+.strike1 { top: 38%; rotate: -9deg; animation: strike1 2.2s ease 0.4s both; }
+.strike2 { top: 60%; rotate:  7deg; animation: strike2 2.2s ease 0.4s both; }
+
+@keyframes maleFade { 0%,64%{color:var(--hero-ink)} 75%,100%{color:transparent} }
+@keyframes meglioDrop {
+  0%,63%{ transform:translate(-50%,-0.9em); opacity:0 }
+  75%{ opacity:1 }
+  95%,100%{ transform:translate(-50%,0); opacity:1 }
+}
+@keyframes strike1 { 0%,25%{transform:scaleX(0)} 35%,64%{transform:scaleX(1);opacity:1} 75%,100%{transform:scaleX(1);opacity:0} }
+@keyframes strike2 { 0%,35%{transform:scaleX(0)} 45%,64%{transform:scaleX(1);opacity:1} 75%,100%{transform:scaleX(1);opacity:0} }
+
+.hero__cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-top: clamp(28px, 6vw, 46px);
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(20px, 4vw, 18px);
+  color: var(--hero-ink); background: var(--hero-cream);
+  padding: clamp(13px, 3.4vw, 17px) clamp(26px, 6vw, 40px);
+  border-radius: 14px; text-decoration: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,.22);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.hero__cta:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,.28); }
+.hero__cta svg { width: 1.3em; height: 1.3em; }
+
+.hero__sub {
+  margin: clamp(20px, 5vw, 30px) auto 0;
+  max-width: 34ch;
+  color: #fff; opacity: .92;
+  font-family: var(--font-mono); font-weight: 400;
+  font-size: clamp(13px, 3.4vw, 16px); line-height: 1.6;
+}
+
+.hero__clouds {
+  position: absolute; left: 0; right: 0; bottom: calc(var(--cloud-h) / -2);
+  height: var(--cloud-h); z-index: 3; pointer-events: none;
+  /*
+   * Le nuvole sono posizionate in px fissi fino a ~2400px: su schermi stretti
+   * la coda sborda a destra e aprirebbe lo scroll orizzontale della pagina.
+   * `clip` invece di `hidden` perché deve tagliare SOLO in orizzontale: le
+   * nuvole devono continuare a sporgere sopra e sotto la fascia (--dy e il
+   * bottom negativo qui sopra). `overflow-x: hidden` non lo permette — con
+   * l'altro asse `visible` il browser lo forza a `auto`, e comparirebbe una
+   * scrollbar verticale; `overflow: clip` è nato apposta per questo caso.
+   */
+  overflow-x: clip;
+  overflow-y: visible;
+}
+.cl-layer { position: absolute; inset: 0; }
+.cl-back  { color: var(--hero-orange-deep); animation: cloudDrift 17s ease-in-out infinite alternate; }
+.cl-front { color: var(--hero-orange); }
+.cloud {
+  position: absolute; top: 50%; aspect-ratio: 871 / 480;
+  transform: translateY(calc(-50% + var(--dy, 0px))) rotate(var(--r, 0deg));
+  filter: drop-shadow(var(--shadow, 0 7px 7px rgba(0,0,0,.16))); /* --shadow: parametro per-nuvola, via style inline */
+}
+/*
+ * La forma vera vive su ::before invece che su .cloud stesso: mask e
+ * filter: drop-shadow sullo stesso elemento è un bug noto dei browser
+ * (Chromium/WebKit) — l'ombra viene tagliata ai bordi della maschera.
+ * Tenendo il mask su un elemento e il filter sul genitore l'ombra torna visibile.
+ */
+.cloud::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: currentColor;
+  -webkit-mask: url(/brand/cloud.svg) center / 100% 100% no-repeat;
+          mask: url(/brand/cloud.svg) center / 100% 100% no-repeat;
+}
+
+@keyframes cloudDrift { from { transform: translateX(-1.5%); } to { transform: translateX(1.5%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .flip__male, .strike { animation: none; }
+  .flip__male { opacity: 0; }
+  .strike { display: none; }
+  .flip__meglio { animation: none; opacity: 1; transform: translate(-50%, 0); }
+  .cl-layer { animation: none; }
+}

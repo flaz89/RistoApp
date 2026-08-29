@@ -22,7 +22,7 @@ const baloo = Baloo_2({
 const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["200", "400", "500", "600", "700"],
   display: "swap",
 });
 

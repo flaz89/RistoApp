@@ -2,8 +2,9 @@
  * Hero (landing v2) — sezione 1.
  * Il proverbio "Chi tardi arriva, MALE alloggia" si trasforma in "...MEGLIO
  * alloggia": la parola male viene sbarrata, sfuma, e meglio scende dall'alto.
- * In fondo al pannello arancione una fascia di nuvole ne copre la linea di
- * base e sfuma l'arancione: da lì (nella sezione mappa) pioveranno i loghi.
+ * La fascia di nuvole che copre la linea di base dell'arancione vive nel
+ * componente LiveMap (live-map.css), non qui — vedi il commento in cima a
+ * Hero.tsx.
  *
  * Colori/font: tutti dai token @theme in globals.css. Solo l'inchiostro scuro
  * su arancione e i due arancioni del gradiente sono locali alla hero.
@@ -11,10 +12,8 @@
 .hero {
   --hero-ink: #2E2B28;
   --hero-orange: var(--color-accent-2);
-  --hero-orange-deep: #C55E00;
   --hero-cream: var(--color-warm);
   --hero-strike: #BA1A1A;
-  --cloud-h: 110px; /* fissa: la fascia di nuvole non cambia tra mobile e desktop */
   position: relative;
   background: var(--hero-ink);
   overflow: visible;
@@ -51,10 +50,15 @@
 }
 .hero__inner {
   position: relative;
-  /* Sopra .hero__clouds (z-index: 3): un z-index sul solo .hero__sub non
+  /* Sopra .cl-front (z-index: 3 in live-map.css, non più qui — vedi il
+     commento in cima a Hero.tsx): un z-index sul solo .hero__sub non
      basterebbe, un figlio non esce mai dallo stacking context del genitore.
-     h1 e cta non toccano mai la fascia nuvole quindi restano invariati a
-     vista; solo hero__sub, che su mobile ci arriva vicino, ne beneficia. */
+     Funziona perché né .hero né .hero__panel né .live-map impostano un loro
+     z-index esplicito: nessuno dei tre fa da "trappola", quindi questo 4
+     arriva a competere direttamente con l'1/2/3 della fascia nuvole+loghi
+     nello stacking context radice. h1 e cta non toccano mai quella fascia
+     quindi restano invariati a vista; solo hero__sub, che su mobile ci
+     arriva vicino, ne beneficia. */
   z-index: 4;
   max-width: 600px;
   margin: 0 auto;
@@ -119,49 +123,9 @@
   font-size: clamp(13px, 3.4vw, 16px); line-height: 1.6;
 }
 
-.hero__clouds {
-  position: absolute; left: 0; right: 0; bottom: calc(var(--cloud-h) / -2);
-  height: var(--cloud-h); z-index: 3; pointer-events: none;
-  /*
-   * Le nuvole sono posizionate in px fissi fino a ~2400px: su schermi stretti
-   * la coda sborda a destra e aprirebbe lo scroll orizzontale della pagina.
-   * `clip` invece di `hidden` perché deve tagliare SOLO in orizzontale: le
-   * nuvole devono continuare a sporgere sopra e sotto la fascia (--dy e il
-   * bottom negativo qui sopra). `overflow-x: hidden` non lo permette — con
-   * l'altro asse `visible` il browser lo forza a `auto`, e comparirebbe una
-   * scrollbar verticale; `overflow: clip` è nato apposta per questo caso.
-   */
-  overflow-x: clip;
-  overflow-y: visible;
-}
-.cl-layer { position: absolute; inset: 0; }
-.cl-back  { color: var(--hero-orange-deep); animation: cloudDrift 17s ease-in-out infinite alternate; }
-.cl-front { color: var(--hero-orange); }
-.cloud {
-  position: absolute; top: 50%; aspect-ratio: 871 / 480;
-  transform: translateY(calc(-50% + var(--dy, 0px))) rotate(var(--r, 0deg));
-  filter: drop-shadow(var(--shadow, 0 7px 7px rgba(0,0,0,.16))); /* --shadow: parametro per-nuvola, via style inline */
-}
-/*
- * La forma vera vive su ::before invece che su .cloud stesso: mask e
- * filter: drop-shadow sullo stesso elemento è un bug noto dei browser
- * (Chromium/WebKit) — l'ombra viene tagliata ai bordi della maschera.
- * Tenendo il mask su un elemento e il filter sul genitore l'ombra torna visibile.
- */
-.cloud::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: currentColor;
-  -webkit-mask: url(/brand/cloud.svg) center / 100% 100% no-repeat;
-          mask: url(/brand/cloud.svg) center / 100% 100% no-repeat;
-}
-
-@keyframes cloudDrift { from { transform: translateX(-1.5%); } to { transform: translateX(1.5%); } }
-
 @media (prefers-reduced-motion: reduce) {
   .flip__male, .strike { animation: none; }
   .flip__male { opacity: 0; }
   .strike { display: none; }
   .flip__meglio { animation: none; opacity: 1; transform: translate(-50%, 0); }
-  .cl-layer { animation: none; }
 }

@@ -1,6 +1,23 @@
 .live-map {
+  /* Alias locali agli stessi valori usati in hero.css, non condivisibili da
+     lì perché sono custom property scoped a .hero. */
+  --map-orange: var(--color-accent-2);
+  --map-orange-deep: #C55E00;
+  --cloud-h: 110px; /* stessa fascia della Hero: la geometria non deve cambiare */
+
+  position: relative; /* contenitore per nuvole e loghi assoluti, z-index:auto: non deve intrappolare i loro z-index (vedi commento più sotto) */
   background: #2E2B28; /* stesso inchiostro di --hero-ink (hero.css), scoped a .hero e non visibile qui */
   padding: 0 clamp(20px, 6vw, 48px);
+  /*
+   * Le nuvole sono posizionate in px fissi fino a ~2400px: su schermi stretti
+   * la coda sborda a destra e aprirebbe lo scroll orizzontale della pagina.
+   * `clip` invece di `hidden` perché deve tagliare SOLO in orizzontale: le
+   * nuvole devono continuare a sporgere sopra e sotto la fascia. `overflow-x:
+   * hidden` non lo permette — con l'altro asse `visible` il browser lo
+   * forza ad `auto`; `overflow: clip` è nato apposta per questo caso.
+   */
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .live-map__inner {
@@ -23,6 +40,11 @@
   transform: translate(-50%, -100%); /* punta ancorata alla coordinata, non il centro */
 }
 
+/* Mobile e tablet: niente padding orizzontale, la mappa va a bordo sezione. */
+@media (max-width: 1024px) {
+  .live-map { padding: 0; }
+}
+
 /*
  * Sotto ~820px (breakpoint già usato in landing.css per v1) l'immagine è
  * larga il 21:13 della foto originale: mantenendo le proporzioni naturali
@@ -32,9 +54,6 @@
  * lungo della foto.
  */
 @media (max-width: 819px) {
-  .live-map {
-    padding: 0;
-  }
   .live-map__inner {
     min-height: 60vh; /* stesso valore dello scaffold originale del placeholder */
     overflow: hidden;
@@ -47,4 +66,100 @@
     height: 100%;
     object-fit: cover;
   }
+}
+
+/*
+ * Fascia di nuvole (bordo Hero/LiveMap) + loghi placeholder che ci "piovono"
+ * in mezzo. `top: calc(--cloud-h / -2)` ancorato a QUESTA sezione riproduce
+ * esattamente lo stesso punto sullo schermo di quando l'ancoraggio era
+ * `bottom` sul pannello Hero, perché i due bordi combaciano (nessun margine
+ * fra le due section). back(1) < loghi(2) < front(3): tre elementi allo
+ * stesso livello (non annidati in un wrapper con z-index proprio, altrimenti
+ * l'intero gruppo farebbe "blocco unico" e i loghi non potrebbero incastrarsi
+ * visivamente fra i due strati di nuvole) — e nessuno dei genitori qui sopra
+ * (.live-map, .hero) ha uno z-index esplicito, quindi 1/2/3 competono
+ * direttamente con lo z-index:4 di .hero__inner (hero.css): abbastanza per
+ * restare sopra la nuvola davanti, dove serve (.hero__sub).
+ */
+.cl-back,
+.cl-front {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--cloud-h) / -2);
+  height: var(--cloud-h);
+  pointer-events: none;
+}
+.cl-back  { z-index: 1; color: var(--map-orange-deep); animation: cloudDrift 17s ease-in-out infinite alternate; }
+.cl-front { z-index: 3; color: var(--map-orange); }
+
+.cloud {
+  position: absolute; top: 50%; aspect-ratio: 871 / 480;
+  transform: translateY(calc(-50% + var(--dy, 0px))) rotate(var(--r, 0deg));
+  filter: drop-shadow(var(--shadow, 0 7px 7px rgba(0,0,0,.16))); /* --shadow: parametro per-nuvola, via style inline */
+}
+/*
+ * La forma vera vive su ::before invece che su .cloud stesso: mask e
+ * filter: drop-shadow sullo stesso elemento è un bug noto dei browser
+ * (Chromium/WebKit) — l'ombra viene tagliata ai bordi della maschera.
+ * Tenendo il mask su un elemento e il filter sul genitore l'ombra torna visibile.
+ */
+.cloud::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: currentColor;
+  -webkit-mask: url(/brand/cloud.svg) center / 100% 100% no-repeat;
+          mask: url(/brand/cloud.svg) center / 100% 100% no-repeat;
+}
+
+@keyframes cloudDrift { from { transform: translateX(-1.5%); } to { transform: translateX(1.5%); } }
+
+.live-map__logos {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--cloud-h) / -2);
+  /* ponytail: "1/3 della sezione" qui è una stima in vw, non l'altezza vera
+     del componente — che varia moltissimo fra il crop mobile (60vh fisso) e
+     l'altezza naturale desktop (~890px alla larghezza massima). Misurarla
+     davvero richiederebbe JS (ResizeObserver); per un'animazione
+     decorativa questa approssimazione basta. */
+  height: clamp(160px, 60vw, 340px);
+  z-index: 2; /* fra .cl-back e .cl-front: i loghi passano dietro la nuvola davanti */
+  pointer-events: none;
+  overflow: visible;
+}
+.live-map__drop {
+  position: absolute;
+  top: 0;
+  width: var(--drop-size, 24px);
+  height: auto;
+  animation: mapFall var(--drop-duration, 7s) linear var(--drop-delay, 0s) infinite;
+}
+/* top (non transform) perché deve muoversi in % dell'altezza del CONTENITORE
+   (.live-map__logos, che ha un'altezza esplicita) — translateY in % si
+   scalerebbe sull'altezza dell'icona stessa, troppo piccola per avere senso. */
+@keyframes mapFall {
+  0%   { top: 0%;   opacity: 0; }
+  10%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Su mobile la fascia è più corta (--cloud-h fisso su una sezione più
+   piccola), quindi lo stesso 85% arriva prima in assoluto: si tiene
+   l'opacità piena più a lungo e si sfuma solo nell'ultimo tratto. */
+@media (max-width: 819px) {
+  .live-map__drop { animation-name: mapFallLate; }
+}
+@keyframes mapFallLate {
+  0%   { top: 0%;   opacity: 0; }
+  10%  { opacity: 1; }
+  94%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cl-back { animation: none; }
+  .live-map__drop { display: none; }
 }

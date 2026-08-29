@@ -1,0 +1,50 @@
+.live-map {
+  background: #2E2B28; /* stesso inchiostro di --hero-ink (hero.css), scoped a .hero e non visibile qui */
+  padding: 0 clamp(20px, 6vw, 48px);
+}
+
+.live-map__inner {
+  position: relative; /* ancora per i pin, in ogni breakpoint */
+  max-width: 1440px; /* stesso limite di .hero__bar (hero.css) */
+  margin: 0 auto;
+}
+
+.live-map__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 24px;
+}
+
+.live-map__pin {
+  position: absolute;
+  width: clamp(20px, 3vw, 28px); /* logo ridotto, mai più grande di un pin */
+  height: auto;
+  transform: translate(-50%, -100%); /* punta ancorata alla coordinata, non il centro */
+}
+
+/*
+ * Sotto ~820px (breakpoint già usato in landing.css per v1) l'immagine è
+ * larga il 21:13 della foto originale: mantenendo le proporzioni naturali
+ * la sezione si schiaccia a una striscia sottile. Qui si passa a un
+ * riquadro di altezza fissa fluida con l'immagine ritagliata (object-fit),
+ * così la sezione occupa più spazio verticale invece di seguire il lato
+ * lungo della foto.
+ */
+@media (max-width: 819px) {
+  .live-map {
+    padding: 0;
+  }
+  .live-map__inner {
+    min-height: 60vh; /* stesso valore dello scaffold originale del placeholder */
+    overflow: hidden;
+    border-radius: 24px;
+  }
+  .live-map__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}

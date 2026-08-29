@@ -51,7 +51,11 @@
 }
 .hero__inner {
   position: relative;
-  z-index: 2;
+  /* Sopra .hero__clouds (z-index: 3): un z-index sul solo .hero__sub non
+     basterebbe, un figlio non esce mai dallo stacking context del genitore.
+     h1 e cta non toccano mai la fascia nuvole quindi restano invariati a
+     vista; solo hero__sub, che su mobile ci arriva vicino, ne beneficia. */
+  z-index: 4;
   max-width: 600px;
   margin: 0 auto;
   text-align: center;

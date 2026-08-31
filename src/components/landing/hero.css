@@ -118,7 +118,7 @@
 .hero__sub {
   margin: clamp(20px, 5vw, 30px) auto 0;
   max-width: 34ch;
-  color: #fff; opacity: .92;
+  color: var(--hero-cream); opacity: .92;
   font-family: var(--font-mono); font-weight: 400;
   font-size: clamp(13px, 3.4vw, 16px); line-height: 1.6;
 }

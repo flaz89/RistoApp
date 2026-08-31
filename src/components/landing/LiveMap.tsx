@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import './live-map.css';
 
 /*
@@ -7,12 +9,12 @@ import './live-map.css';
  */
 const PINS = [
   { top: '28%', left: '34%' },
-  { top: '46%', left: '52%' },
-  { top: '69%', left: '10%' },
+  { top: '56%', left: '52%' },
+  { top: '60%', left: '10%' },
   { top: '38%', left: '68%' },
   { top: '90%', left: '60%' },
   { top: '24%', left: '58%' },
-  { top: '54%', left: '30%' },
+  { top: '73%', left: '30%' },
   { top: '66%', left: '72%' },
 ];
 
@@ -140,6 +142,20 @@ export default function LiveMap() {
             style={pos}
           />
         ))}
+
+        {/* Stesso CTA della Hero, al centro della sezione: --hero-ink/--hero-cream
+            sono scoped a .hero e non arrivano qui, quindi live-map__cta ripete
+            lo stile con colori inline invece di condividere la classe. */}
+        <div className="live-map__cta-wrap">
+          <p className="live-map__tagline">Tutto quello che succede. Mentre succede.</p>
+
+          <Link href="/ristoranti" className="live-map__cta">
+            A due passi da te. Ora
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </Link>
+        </div>
       </div>
 
       <div aria-hidden="true">

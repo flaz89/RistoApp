@@ -40,9 +40,10 @@
   transform: translate(-50%, -100%); /* punta ancorata alla coordinata, non il centro */
 }
 
-/* Mobile e tablet: niente padding orizzontale, la mappa va a bordo sezione. */
+/* Mobile e tablet: niente padding orizzontale (la mappa va a bordo sezione),
+   ma un po' di spazio sopra per staccarla dalla Hero. */
 @media (max-width: 1024px) {
-  .live-map { padding: 0; }
+  .live-map { padding: clamp(24px, 8vw, 48px) 0 0; }
 }
 
 /*
@@ -55,7 +56,7 @@
  */
 @media (max-width: 819px) {
   .live-map__inner {
-    min-height: 60vh; /* stesso valore dello scaffold originale del placeholder */
+    min-height: 75vh; /* più spazio a schermo su mobile (era 60vh) */
     overflow: hidden;
     border-radius: 24px;
   }
@@ -162,4 +163,65 @@
 @media (prefers-reduced-motion: reduce) {
   .cl-back { animation: none; }
   .live-map__drop { display: none; }
+}
+
+/*
+ * CTA identico a .hero__cta (hero.css), stesso markup/stile — solo i colori
+ * sono inline invece di var(--hero-ink)/var(--hero-cream): quelle custom
+ * property sono scoped a .hero (vedi commento in cima a questo file) e qui
+ * non risolverebbero. Overlay ancorato al bordo inferiore della foto mappa
+ * (non in flusso sotto): .live-map__inner è già position:relative, stessa
+ * base di ancoraggio usata dai pin.
+ */
+.live-map__cta-wrap {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(14px, 3vw, 22px);
+  text-align: center;
+  white-space: nowrap; /* shrink-to-fit assoluto con solo `left`/`top`: senza questo il contenuto va a capo */
+}
+.live-map__tagline {
+  margin: 0;
+  color: var(--color-warm);
+  font-family: var(--font-mono); font-weight: 400;
+  font-size: clamp(13px, 3.4vw, 16px);
+  text-shadow: 0 4px 12px rgba(0,0,0,.7); /* sopra la foto mappa, non sfocata come il CTA */
+}
+.live-map__cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  white-space: nowrap; /* wrap-to-fit dello shrink-to-fit su assoluto con solo `left` impostato: senza questo "Curiosa" va a capo sotto ~contenitore/2 */
+  font-family: var(--font-display); font-weight: 800;
+  font-size: clamp(20px, 4vw, 18px);
+  color: var(--color-warm);
+  padding: clamp(13px, 3.4vw, 17px) clamp(26px, 6vw, 40px);
+  border-radius: 14px; text-decoration: none;
+  border: 2px solid var(--color-warm);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); /* legge la mappa sotto, non un colore piatto */
+  box-shadow: 0 6px 18px rgba(0,0,0,.90);
+  /*
+   * Riempimento "a barra di caricamento": un gradiente piatto (colore dei
+   * bordi) usato come sfondo, con background-size animato da 0% a 100%
+   * larghezza — parte da sinistra (background-position di default) e cresce
+   * verso destra, niente pseudo-elemento/z-index perché lo sfondo di un
+   * elemento dipinge già sotto al suo contenuto.
+   */
+  background: linear-gradient(var(--color-warm), var(--color-warm)) no-repeat;
+  background-size: 0% 100%;
+  transition: transform .18s ease, box-shadow .18s ease, background-size .45s ease, color .45s ease;
+}
+.live-map__cta:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,.28); }
+.live-map__cta svg { width: 1.3em; height: 1.3em; }
+
+/* Solo dispositivi con vero hover (mouse): niente hover "appiccicoso" dopo
+   un tap su touch. */
+@media (hover: hover) and (pointer: fine) {
+  .live-map__cta:hover {
+    background-size: 100% 100%;
+    color: #2E2B28; /* stesso inchiostro di --hero-ink (hero.css), scoped a .hero e non visibile qui */
+  }
 }

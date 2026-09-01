@@ -20,6 +20,7 @@
 }
 
 .hero__bar {
+  position: relative; /* ancora per il dropdown mobile di .hero__nav */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -29,6 +30,67 @@
 }
 .hero__wm { display: inline-flex; align-items: center; }
 .hero__wm-logo { height: clamp(26px, 7vw, 34px); width: auto; display: block; }
+
+/* Checkbox reale del toggle: invisibile, guida solo lo stato via :checked. */
+.hero__nav-toggle { position: absolute; opacity: 0; pointer-events: none; }
+
+.hero__nav-burger {
+  display: none; /* sopra gli 819px il menu è sempre visibile disteso, niente hamburger */
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 26px; height: 20px;
+  cursor: pointer;
+}
+.hero__nav-burger span {
+  display: block; height: 2px; width: 100%;
+  background: var(--hero-cream);
+  border-radius: 2px;
+}
+
+.hero__nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 3vw, 32px);
+}
+.hero__nav-link {
+  font-family: var(--font-mono); font-weight: 400;
+  font-size: 14px;
+  color: var(--hero-cream);
+  opacity: .85;
+  text-decoration: none;
+}
+.hero__nav-link:hover { opacity: 1; }
+
+/* Sotto 819px (stesso breakpoint "mobile" di live-map.css) i 4 link si
+   raggruppano in un dropdown dietro l'hamburger invece di stare distesi
+   nella barra, dove non ci starebbero. */
+@media (max-width: 819px) {
+  .hero__nav-burger { display: flex; }
+  .hero__nav {
+    display: none;
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 4px clamp(20px, 6vw, 48px) 16px;
+    background: var(--hero-ink);
+  }
+  .hero__nav-toggle:checked ~ .hero__nav { display: flex; }
+}
+
+/* Sopra 819px i 4 link sono sempre distesi (niente hamburger): li si vuole
+   raggruppati vicino a Sign In sulla destra, non spaziati al centro dalla
+   justify-content: space-between di base (quella resta per il mobile, dove
+   con soli 3 elementi visibili — logo, hamburger, Sign In — centra bene
+   l'hamburger). margin-right: auto sul logo consuma da solo tutto lo
+   spazio libero e spinge nav + Sign In a incollarsi sul lato destro. */
+@media (min-width: 820px) {
+  .hero__bar { justify-content: flex-start; gap: clamp(16px, 3vw, 32px); }
+  .hero__wm { margin-right: auto; }
+}
+
 .hero__signin {
   font-family: var(--font-display);
   font-weight: 800;
@@ -82,24 +144,61 @@
   vertical-align: bottom;
 }
 .flip__w { position: absolute; left: 50%; top: 0; transform: translateX(-50%); white-space: nowrap; }
-.flip__male   {font-family: var(--font-display); font-weight: 800; color: var(--hero-ink); animation: maleFade 2.2s ease 0.4s both; }
-.flip__meglio {font-family: var(--font-display); font-weight: 800; color: var(--hero-cream); opacity: 0; animation: meglioDrop 2.2s cubic-bezier(.2,.75,.2,1) 0.4s both; }
-.strike {
-  position: absolute; left: -5%; right: -5%; height: 0.14em;
-  border-radius: 0.1em; background: var(--hero-strike);
-  transform-origin: left center; transform: scaleX(0);
+/*
+ * Timeline dell'intro (una volta sola, non in loop — "both" tiene lo stato
+ * finale). Prima tutti gli step condividevano un'unica durata di 2.2s e si
+ * scaglionavano con percentuali dentro i keyframe: difficile da ritarare
+ * (cambiare un tempo voleva dire ricalcolare tutte le percentuali). Ora ogni
+ * step ha il proprio delay/durata assoluti in secondi:
+ *   0.4s            → "male" appare, fermo, senza sbarre
+ *   3.4s (3s dopo)  → parte la sbarra 1 (0.7s, più lenta di prima)
+ *   3.6s            → parte la sbarra 2, scaglionata di 0.2s per un effetto "a mano"
+ *   4.3s            → finite le sbarre: male + sbarre sfumano, meglio scende (0.5s)
+ */
+.flip__male   {font-family: var(--font-display); font-weight: 800; color: var(--hero-ink); animation: maleFade 0.5s ease 4.3s both; }
+.flip__meglio {font-family: var(--font-display); font-weight: 800; color: var(--hero-cream); opacity: 0; animation: meglioDrop 0.5s cubic-bezier(.2,.75,.2,1) 4.3s both; }
+/*
+ * strike1/strike2 sono l'SVG disegnato a mano (public/icons/StrikeHero.svg,
+ * già riempito con --hero-strike), non più una barra CSS — niente classe
+ * .strike condivisa: quel background/height da barra piatta rovinerebbe lo
+ * scarabocchio. Ogni sbarra ha il proprio pivot (transform-origin) su un
+ * angolo della parola e cresce verso l'angolo opposto: rotate e scaleX
+ * stanno nella STESSA proprietà transform (non rotate separata + transform
+ * scaleX) apposta — con proprietà individuali l'ordine di composizione
+ * rotate/scale non è garantito allo stesso modo in tutti i motori, e in
+ * pratica il segno veniva fuori quasi piatto (un sottolineato) invece che
+ * in diagonale. Dentro un'unica `transform: rotate() scaleX()` l'ordine è
+ * quello scritto, non ambiguo: scaleX (più a destra) si applica per primo
+ * sulle coordinate originali — il tratto cresce lungo il proprio asse
+ * orizzontale locale — e SOLO dopo rotate lo inclina verso l'angolo opposto
+ * al pivot. max-width: none sovrascrive il preflight di Tailwind
+ * (img, video { max-width: 100% }): senza, il width qui sotto verrebbe
+ * clampato al 100% del contenitore qualunque valore gli si desse.
+ */
+/* Ogni sbarra ha DUE animazioni indipendenti (proprietà diverse, non si
+   pestano i piedi): il tratto (transform, scaleX 0→1) e la dissolvenza
+   finale (opacity, agganciata allo stesso delay/durata — 4.3s/0.5s — dello
+   swap male→meglio qui sopra), invece di infilare anche l'opacity dentro la
+   stessa keyframe del tratto e dover ricalcolare le percentuali ogni volta
+   che cambia un tempo. */
+.strike1 {
+  position: absolute; top: 78%; left: -10%; width: 130%; max-width: none; height: auto;
+  transform-origin: left bottom; /* pivot in basso a sinistra... */
+  transform: rotate(-22deg) scaleX(0); /* ...cresce verso l'alto a destra */
+  animation: strike1 0.7s ease 3.4s both, strikeFadeOut 0.5s ease 4.3s both;
 }
-.strike1 { top: 38%; rotate: -9deg; animation: strike1 2.2s ease 0.4s both; }
-.strike2 { top: 60%; rotate:  7deg; animation: strike2 2.2s ease 0.4s both; }
+.strike2 {
+  position: absolute; top: 8%; left: -10%; width: 130%; max-width: none; height: auto;
+  transform-origin: left top; /* pivot in alto a sinistra... */
+  transform: rotate(22deg) scaleX(0); /* ...cresce verso il basso a destra (verso opposto a strike1) */
+  animation: strike2 0.7s ease 3.6s both, strikeFadeOut 0.5s ease 4.3s both;
+}
 
-@keyframes maleFade { 0%,64%{color:var(--hero-ink)} 75%,100%{color:transparent} }
-@keyframes meglioDrop {
-  0%,63%{ transform:translate(-50%,-0.9em); opacity:0 }
-  75%{ opacity:1 }
-  95%,100%{ transform:translate(-50%,0); opacity:1 }
-}
-@keyframes strike1 { 0%,25%{transform:scaleX(0)} 35%,64%{transform:scaleX(1);opacity:1} 75%,100%{transform:scaleX(1);opacity:0} }
-@keyframes strike2 { 0%,35%{transform:scaleX(0)} 45%,64%{transform:scaleX(1);opacity:1} 75%,100%{transform:scaleX(1);opacity:0} }
+@keyframes maleFade { from{color:var(--hero-ink)} to{color:transparent} }
+@keyframes meglioDrop { from{transform:translate(-50%,-0.9em); opacity:0} to{transform:translate(-50%,0); opacity:1} }
+@keyframes strike1 { from{transform:rotate(-22deg) scaleX(0)} to{transform:rotate(-22deg) scaleX(1)} }
+@keyframes strike2 { from{transform:rotate(22deg) scaleX(0)} to{transform:rotate(22deg) scaleX(1)} }
+@keyframes strikeFadeOut { from{opacity:1} to{opacity:0} }
 
 .hero__cta {
   display: inline-flex; align-items: center; gap: 10px;
@@ -121,11 +220,12 @@
   color: var(--hero-cream); opacity: .92;
   font-family: var(--font-mono); font-weight: 400;
   font-size: clamp(13px, 3.4vw, 16px); line-height: 1.6;
+  text-shadow: 0 2px 4px rgba(0,0,0,.58);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .flip__male, .strike { animation: none; }
+  .flip__male, .strike1, .strike2 { animation: none; }
   .flip__male { opacity: 0; }
-  .strike { display: none; }
+  .strike1, .strike2 { display: none; }
   .flip__meglio { animation: none; opacity: 1; transform: translate(-50%, 0); }
 }

@@ -5,7 +5,14 @@
   --map-orange-deep: #C55E00;
   --cloud-h: 110px; /* stessa fascia della Hero: la geometria non deve cambiare */
 
-  position: relative; /* contenitore per nuvole e loghi assoluti, z-index:auto: non deve intrappolare i loro z-index (vedi commento più sotto) */
+  /* sticky, non relative: LiveMap deve restare agganciata in cima alla
+     viewport mentre si scorre la sua altezza, così Pillars (sezione
+     successiva, vedi pillars.css) le scorre sopra e la copre — non un
+     semplice contenitore per nuvole/loghi assoluti, anche se continua a
+     servire pure a quello (z-index:auto: non intrappola i loro z-index,
+     vedi commento più sotto). */
+  position: sticky;
+  top: 0;
   background: #2E2B28; /* stesso inchiostro di --hero-ink (hero.css), scoped a .hero e non visibile qui */
   padding: 0 clamp(20px, 6vw, 48px);
   /*

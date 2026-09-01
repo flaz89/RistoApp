@@ -1,0 +1,28 @@
+/*
+ * Pillars (landing v2) — sezione 3, ancora scheletro/placeholder: struttura
+ * e effetto di scroll pronti, contenuto vero (i 3 pilastri) da un giro
+ * successivo.
+ *
+ * position: relative (non "static", il default) è quello che fa funzionare
+ * l'effetto "copre LiveMap scrollando", non un dettaglio decorativo: LiveMap
+ * è position: sticky (live-map.css), e un elemento "positioned" — sticky
+ * incluso — dipinge SEMPRE sopra un fratello normal-flow (position: static),
+ * indipendentemente dall'ordine nel DOM. Senza questo, Pillars finirebbe
+ * SOTTO LiveMap invece che sopra, anche arrivando dopo nel markup. Con
+ * entrambi "positioned" e senza z-index esplicito, vince l'ordine nel DOM —
+ * Pillars, che viene dopo, dipinge sopra.
+ */
+.pillars {
+  position: relative;
+  min-height: 100dvh; /* dvh, non vh: sulle viewport mobile che aprono/chiudono barre non deve lasciare uno spiraglio di LiveMap visibile sotto */
+  background: var(--color-page); /* stesso fondo del body (globals.css): opaco, copre LiveMap per intero */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pillars__placeholder {
+  color: var(--color-ink-3);
+  font-family: var(--font-mono);
+  font-size: 14px;
+}

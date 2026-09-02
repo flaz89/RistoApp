@@ -15,14 +15,38 @@
 .pillars {
   position: relative;
   min-height: 100dvh; /* dvh, non vh: sulle viewport mobile che aprono/chiudono barre non deve lasciare uno spiraglio di LiveMap visibile sotto */
-  background: var(--color-page); /* stesso fondo del body (globals.css): opaco, copre LiveMap per intero */
+  background: var(--color-warm); /* stesso fondo del body (globals.css): opaco, copre LiveMap per intero */
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow-x: clip; /* le casette a left:0%/100% sporgono per metà fuori dai bordi (translateX(-50%)), come .live-map (live-map.css) */
 }
 
 .pillars__placeholder {
   color: var(--color-ink-3);
   font-family: var(--font-mono);
   font-size: 14px;
+}
+
+/*
+ * Skyline placeholder sul bordo superiore di Pillars, stesso spirito della
+ * fascia di nuvole in LiveMap (live-map.css): una striscia assoluta ancorata
+ * al bordo della sezione con le icone distribuite dentro. Qui niente
+ * animazione/mask — è un solo SVG già colorato (non una forma a un colore
+ * da tingere con currentColor come le nuvole), quindi va bene un <img> semplice.
+ */
+.pillars__town {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 0; /* la base delle casette deve poggiare esattamente sul bordo superiore della sezione, non 150px più in basso */
+  pointer-events: none;
+}
+.pillars__house {
+  position: absolute;
+  bottom: 0; /* left è il bordo sinistro, non il centro — come .cloud in live-map.css */
+  height: auto;
+  transform: translateY(var(--dy, 0px)); /* dy positivo = più in basso (affonda sotto il bordo), negativo = più in alto */
+  filter: drop-shadow(var(--shadow, 0 6px 6px rgba(0, 0, 0, 0.18))); /* --shadow: parametro per-edificio, via style inline */
 }

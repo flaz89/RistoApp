@@ -17,15 +17,45 @@
   min-height: 100dvh; /* dvh, non vh: sulle viewport mobile che aprono/chiudono barre non deve lasciare uno spiraglio di LiveMap visibile sotto */
   background: var(--color-warm); /* stesso fondo del body (globals.css): opaco, copre LiveMap per intero */
   display: flex;
-  align-items: center;
+  align-items: stretch; /* pannello ancorato in alto (margin-top) e steso fino al bordo inferiore della sezione, non alto solo quanto il contenuto */
   justify-content: center;
-  overflow-x: clip; /* le casette a left:0%/100% sporgono per metà fuori dai bordi (translateX(-50%)), come .live-map (live-map.css) */
+  /*
+   * NON overflow-x: clip qui — WebKit (Safari desktop e iOS, quindi anche
+   * l'anteprima Vercel) ha un bug noto per cui overflow-x: clip su un
+   * elemento con figli che scappano verticalmente (.pillars__town qui sotto,
+   * height:0 con le casette che sporgono sopra il bordo) clippa anche l'asse
+   * Y non dichiarato, facendo sparire le casette — su Chrome desktop invece
+   * (localhost) funziona, perché non applica lo stesso clip incrociato.
+   * Il clip orizzontale ora vive su .pillars__town, che non ha più figli che
+   * le sfuggono in verticale: vedi commento lì sotto.
+   */
 }
 
-.pillars__placeholder {
-  color: var(--color-ink-3);
-  font-family: var(--font-mono);
-  font-size: 14px;
+/*
+ * Stessa forma di .hero__panel (hero.css): angoli superiori smussati
+ * ellittici, stesso margin-top di offset dal bordo. Width:100% perché qui,
+ * a differenza di .hero__panel (block, riempie .hero da solo), il genitore
+ * è un flex container (.pillars) — senza questo resterebbe largo quanto il
+ * contenuto invece che bordo a bordo.
+ */
+.pillars__panel {
+  position: relative;
+  width: 100%;
+  margin-top: clamp(44px, 6vw, 220px); /* tetto alzato: a 104px il clamp smetteva di crescere già da ~1733px di viewport in su */
+  padding: clamp(40px, 9vw, 84px) 20px clamp(96px, 20vw, 168px);
+  background: #2E2B28;
+  border-radius: 50% 50% 0 0 / clamp(48px, 12vw, 96px) clamp(48px, 12vw, 96px) 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pillars__title {
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(28px, 6vw, 48px);
 }
 
 /*
@@ -39,8 +69,9 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 0;
-  height: 0; /* la base delle casette deve poggiare esattamente sul bordo superiore della sezione, non 150px più in basso */
+  bottom: 100%; /* bordo inferiore del box = bordo superiore di .pillars, il box si estende verso l'alto */
+  height: 150px; /* più della casetta più alta (Colonnato, ~126px) + --dy: le casette restano DENTRO il box, non lo scappano più in verticale */
+  overflow-x: clip; /* clip orizzontale sicuro qui: a differenza di .pillars, questo box non ha figli che sfuggono in Y, quindi niente bug WebKit da innescare */
   pointer-events: none;
 }
 .pillars__house {

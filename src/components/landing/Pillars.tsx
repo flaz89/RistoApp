@@ -19,9 +19,15 @@ const TOWN: Building[] = [
   { icon: '/icons/town/Arco.svg',  left: '70px',  w: '90px', dy: 2, shadow: '0px -20px 4px rgba(0,0,0,.3)' },
   { icon: '/icons/town/Casa1.svg', left: '620px', w: '110px', dy:2 , shadow: '0px -20px 8px rgba(0,0,0,.3)' },
   { icon: '/icons/town/Casa2.svg',  left: '720px', w: '135px',dy: 2, shadow: '0px -20px 8px rgba(0,0,0,.3)' },
+  { icon: '/icons/town/Arco.svg',  left: '1280px',  w: '80px', dy: 2, shadow: '0px -20px 4px rgba(0,0,0,.3)' },
+  { icon: '/icons/town/Villa.svg', left: '1140px', w: '170px', dy:5, shadow: '0px -20px 8px rgba(0,0,0,.3)' },
   { icon: '/icons/town/Torre.svg', left: '1090px', w: '90px', dy:5, shadow: '0px -20px 8px rgba(0,0,0,.3)' },
   { icon: '/icons/town/Cascina4.svg', left: '970px', w: '170px', dy:2, shadow: '0px -20px 8px rgba(0,0,0,.3)' },
   { icon: '/icons/town/Palazzo.svg', left: '830px', w: '170px', dy:5, shadow: '0px -20px 8px rgba(0,0,0,.3)' },
+  { icon: '/icons/town/Casa1.svg', left: '1600px',  w: '120px', dy: 2, shadow: '0px -20px 8px rgba(0,0,0,.30)' },
+  { icon: '/icons/town/Cascina4.svg', left: '1480px',  w: '160px', dy: 2, shadow: '-18px -20px 4px rgba(0,0,0,.30)' },
+  { icon: '/icons/town/Cascina2.svg', left: '1350px',  w: '150px', dy: 2, shadow: '0px -20px 8px rgba(0,0,0,.30)' },
+  { icon: '/icons/town/Cascina2.svg', left: '1700px',  w: '150px', dy: 2, shadow: '0px -20px 8px rgba(0,0,0,.30)' },
 ];
 
 /**
@@ -50,7 +56,9 @@ export default function Pillars() {
         ))}
       </div>
 
-      <p className="pillars__placeholder">Pillars — TODO</p>
+      <div className="pillars__panel">
+        <h2 className="pillars__title">I PILASTRI</h2>
+      </div>
     </section>
   );
 }

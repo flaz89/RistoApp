@@ -57,7 +57,23 @@ export default function Pillars() {
       </div>
 
       <div className="pillars__panel">
-        <h2 className="pillars__title">I PILASTRI</h2>
+        <div className="pillars__pillar">
+          <span className="pillars__pillar-label">{'// RISTORANTI'}</span>
+          {/* eslint-disable-next-line @next/next/no-img-element -- static asset, next/image è overkill qui */}
+          <img src="/brand/tavolo.svg" alt="" aria-hidden="true" className="pillars__pillar-icon" />
+          {/* non un <img>: background-image invece dell'elemento immagine,
+              stessa tecnica già usata per Wall.svg qui sopra — l'asset
+              (StrikeCream.svg) ha preserveAspectRatio="none" apposta, così
+              background-size può stirarlo in modo non uniforme (vedi
+              commento in pillars.css sul perché serve). */}
+          <div aria-hidden="true" className="pillars__pillar-strike" />
+          <p className="pillars__pillar-text">
+            I tavoli si liberano di continuo. Curius te lo dice nell&apos;istante in cui succede, nei locali vicino a te. Scegli e prenoti in un tocco.
+          </p>
+        </div>
+        <h2 className="pillars__pillar-heading">
+          Prenota il tavolo appena liberato.
+        </h2>
       </div>
     </section>
   );

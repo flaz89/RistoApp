@@ -42,12 +42,114 @@
   position: relative;
   width: 100%;
   margin-top: clamp(44px, 6vw, 220px); /* tetto alzato: a 104px il clamp smetteva di crescere già da ~1733px di viewport in su */
-  padding: clamp(40px, 9vw, 84px) 20px clamp(96px, 20vw, 168px);
-  background: #2E2B28;
+  padding: clamp(40px, 9vw, 84px) 20px clamp(96px, 20vw, 84px);
+  background-color: #2E2B28;
+  /* Wall.svg è già colorato (fill #393532, vicino al fondo #2E2B28) e largo
+     1440px: repeat-x lo ripete in orizzontale sui viewport più larghi,
+     bottom lo ancora al bordo inferiore del pannello (dove la texture "regge"
+     visivamente, essendo un muro). Va sotto al contenuto senza z-index perché
+     un background-image dipinge sempre dietro ai figli in flow. */
+  background-image: url('/brand/Wall.svg');
+  background-repeat: repeat-x;
+  background-position: top;
   border-radius: 50% 50% 0 0 / clamp(48px, 12vw, 96px) clamp(48px, 12vw, 96px) 0 0;
   display: flex;
+  flex-direction: column; /* pillar e h2 impilati, non affiancati */
   align-items: center;
   justify-content: center;
+}
+
+/*
+ * Contenuto di un singolo pilastro: etichetta mono, icona del pilastro,
+ * sbarra decorativa sotto — impilati in colonna, centrati. Per ora un solo
+ * pilastro dentro .pillars__panel, gli altri due arrivano in un giro
+ * successivo (vedi TODO in cima al file).
+ */
+.pillars__pillar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 100px;
+  /* width:100% (non align-self:stretch): .pillars__panel è flex-direction
+     row (default), dove align-items/align-self controllano l'asse
+     trasversale VERTICALE, non la larghezza — stretch lì avrebbe stirato
+     l'altezza del pillar, non la larghezza. width:100% lo porta a coprire
+     tutta la larghezza del pannello, così lo strike sotto può agganciarsi
+     al pannello intero con width:100% sul proprio. */
+}
+.pillars__pillar-label {
+  color: var(--color-warm);
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: clamp(13px, 3.4vw, 16px);
+}
+.pillars__pillar-icon {
+  width: clamp(140px, 22vw, 320px);
+  height: auto;
+  padding: clamp(16px, 4vw, 42px) 0;
+}
+.pillars__pillar-text {
+  margin-top: clamp(16px, 3vw, 28px);
+  font-family: var(--font-sans);
+  font-size: clamp(16px, 3.4vw, 20px);
+  font-weight: 200;
+  color: var(--color-warm);
+  max-width: clamp(140px, 22vw, 320px); /* stessa larghezza di .pillars__pillar-icon (tavolo.svg) qui sopra */
+  text-align: center;
+}
+.pillars__pillar-heading {
+  margin: 0;
+  margin-top: clamp(40px, 6vw, 96px);
+  font-family: var(--font-display); /* stesso font-display+800 di .flip__meglio in hero.css */
+  font-weight: 800;
+  font-size: clamp(38px, 10.5vw, 58px); /* stessa size di .hero__quote, ereditata da "meglio" in hero.css */
+  color: var(--color-warm);
+}
+.pillars__pillar-strike {
+  width: 100%; /* 100% di .pillars__pillar, ora stretch sul pannello intero */
+  height: 3px;
+  /*
+   * background-size: 100% 100% stira SOLO se l'SVG ha preserveAspectRatio=
+   * "none" (impostato a mano su StrikeCream.svg, copia di StrikeHero.svg):
+   * per default un SVG con viewBox usa preserveAspectRatio="xMidYMid meet",
+   * che scala il contenuto in proporzione e lo centra dentro qualunque
+   * viewport gli venga dato — un vincolo INTERNO all'SVG, che ignora sia
+   * width/height/object-fit su <img> sia background-size qui. Senza quel
+   * preserveAspectRatio="none" lo strike restava piccolo e centrato
+   * qualunque dimensione gli si desse da fuori.
+   */
+  background-image: url('/icons/StrikeCream.svg');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+@media (max-width: 819px) {
+  .pillars__panel {
+    /* stesso 1440px nativo di Wall.svg ma al 75% — su mobile la tile intera
+       (1080px) era comunque più larga dello schermo, quindi non c'è
+       differenza percepibile in quante volte ripete, solo bricks più piccoli. */
+    background-size: 1080px auto;
+  }
+  .pillars__pillar-icon {
+    /* sotto 819px il clamp(140px, 22vw, 320px) sta sempre sul floor 140px
+       (22vw di un viewport mobile non arriva mai a superarlo) — floor alzato
+       a 200px per farla risaltare di più su schermo piccolo. */
+    width: clamp(250px, 22vw, 320px);
+  }
+  .pillars__pillar-text {
+    max-width: clamp(250px, 22vw, 320px); /* stesso floor alzato dell'icona qui sopra */
+    font-size: clamp(18px, 3.4vw, 20px); /* sotto 819px il 3.4vw sta sempre sul floor, alzato da 16 a 18 */
+  }
+  .pillars__pillar {
+    transform: translateY(-50px);
+  }
+  .pillars__pillar-heading {
+    /* align-items:center su .pillars__panel centra il BOX, non le righe
+       interne quando va a capo — su mobile il font (clamp fino a 10.5vw) fa
+       wrappare il titolo, serve text-align per centrare anche le righe. */
+    text-align: center;
+    margin-top: 16px; /* il clamp(40px,6vw,96px) di base scendeva comunque troppo su schermo piccolo */
+  }
 }
 
 .pillars__title {

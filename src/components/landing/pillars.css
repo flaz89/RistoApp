@@ -183,3 +183,24 @@
   transform: translateY(var(--dy, 0px)); /* dy positivo = più in basso (affonda sotto il bordo), negativo = più in alto */
   filter: drop-shadow(var(--shadow, 0 6px 6px rgba(0, 0, 0, 0.18))); /* --shadow: parametro per-edificio, via style inline */
 }
+
+/*
+ * Indicatore slide dei 3 pilastri: barrette in fondo al pannello.
+ * Spec dal Figma (node 98:180): 31x9px, radius 3, gap 15; attiva
+ * --color-accent-2 (#F67700), inattive deep-orange #C55E00.
+ * Statiche per ora (solo Ristoranti esiste): quando arrivano gli altri
+ * due pilastri, la classe .is-active seguira lo scroll/slide attivo.
+ */
+.pillars__dots {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: clamp(28px, 5vw, 48px);
+}
+.pillars__dots span {
+  width: 31px;
+  height: 9px;
+  border-radius: 3px;
+  background: #C55E00;
+}
+.pillars__dots span.is-active { background: var(--color-accent-2); }

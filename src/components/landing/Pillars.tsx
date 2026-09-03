@@ -74,6 +74,12 @@ export default function Pillars() {
         <h2 className="pillars__pillar-heading">
           Prenota il tavolo appena liberato.
         </h2>
+
+        <div className="pillars__dots" aria-hidden="true">
+          <span className="is-active" />
+          <span />
+          <span />
+        </div>
       </div>
     </section>
   );

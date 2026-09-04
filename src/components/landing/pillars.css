@@ -42,7 +42,7 @@
   position: relative;
   width: 100%;
   margin-top: clamp(44px, 6vw, 220px); /* tetto alzato: a 104px il clamp smetteva di crescere già da ~1733px di viewport in su */
-  padding: clamp(40px, 9vw, 84px) 20px clamp(96px, 20vw, 84px);
+  padding: clamp(40px, 9vw, 84px) 20px clamp(40px, 9vw, 84px);
   background-color: #2E2B28;
   /* Wall.svg è già colorato (fill #393532, vicino al fondo #2E2B28) e largo
      1440px: repeat-x lo ripete in orizzontale sui viewport più larghi,
@@ -99,7 +99,7 @@
 }
 .pillars__pillar-heading {
   margin: 0;
-  margin-top: clamp(40px, 6vw, 96px);
+  margin-top: clamp(24px, 4vw, 48px);
   font-family: var(--font-display); /* stesso font-display+800 di .flip__meglio in hero.css */
   font-weight: 800;
   font-size: clamp(38px, 10.5vw, 58px); /* stessa size di .hero__quote, ereditata da "meglio" in hero.css */
@@ -141,7 +141,12 @@
     font-size: clamp(18px, 3.4vw, 20px); /* sotto 819px il 3.4vw sta sempre sul floor, alzato da 16 a 18 */
   }
   .pillars__pillar {
-    transform: translateY(-50px);
+    /* era transform: translateY(-50px) — spostava SOLO il contenuto di
+       .pillars__pillar, non l'h2 (fratello fuori da questo div): il gap
+       testo→h2 sembrava 66px (16 dichiarati + 50 di transform) invece dei
+       16px reali. padding-top in flow-layout ottiene lo stesso offset
+       visivo senza scollegare i due fratelli. */
+    padding-top: 48px;
   }
   .pillars__pillar-heading {
     /* align-items:center su .pillars__panel centra il BOX, non le righe

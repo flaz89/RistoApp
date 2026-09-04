@@ -1,6 +1,35 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
 import './pillars.css';
 
 type Building = { icon: string; left: string; w: string; dy?: number; shadow?: string };
+
+type Pillar = { label: string; icon: string; text: string; heading: string };
+
+/*
+ * I 3 pilastri.
+ */
+const PILLARS: Pillar[] = [
+  {
+    label: '// RISTORANTI',
+    icon: '/brand/tavolo.svg',
+    text: "I tavoli si liberano di continuo. Curius te lo dice nell'istante in cui succede, nei locali vicino a te. Scegli e prenoti in un tocco.",
+    heading: 'Prenota il tavolo appena liberato.',
+  },
+  {
+    label: '// NEGOZI',
+    icon: '/brand/negozio.svg',
+    text: 'Ordini dalle botteghe intorno a te e paghi dal telefono. Quando è pronto ti avvisano: passi, ritiri, sei già fuori.',
+    heading: 'Salta la fila, ritira e vai.',
+  },
+  {
+    label: '// OCCASIONI',
+    icon: '/brand/occasione.svg',
+    text: 'Offerte lampo, ultimi pezzi, promozioni che durano poche ore. Le vedi apparire sulla mappa e le prendi al volo.',
+    heading: 'Prendila prima che sparisca.',
+  },
+];
 
 /*
  * Skyline sul bordo superiore di Pillars — stessa meccanica della fascia di
@@ -31,13 +60,55 @@ const TOWN: Building[] = [
 ];
 
 /**
- * Sezione 3 della landing v2: i 3 pilastri. Per ora solo lo scheletro
- * dell'effetto di scroll (vedi il commento in cima a pillars.css) — nessun
- * contenuto vero ancora, arriva in un giro successivo.
+ * Sezione 3 della landing v2: i 3 pilastri, con effetto "sticky scroll" —
+ * la sezione resta agganciata in viewport mentre l'utente scrolla, e quello
+ * scroll fa avanzare il pilastro mostrato invece che la pagina (vedi
+ * commento su .pillars in pillars.css per i dettagli del meccanismo CSS).
  */
 export default function Pillars() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+
+    // ponytail: scroll listener con rAF throttle, niente IntersectionObserver
+    // né libreria — la sezione ha un'unica altezza nota (N * 100dvh) da cui
+    // ricavare la progressione con un calcolo diretto sul suo bounding rect.
+    let ticking = false;
+    const updateActive = () => {
+      ticking = false;
+      const rect = el.getBoundingClientRect();
+      const scrollable = rect.height - window.innerHeight;
+      if (scrollable <= 0) return;
+      const progress = Math.min(1, Math.max(0, -rect.top / scrollable));
+      const idx = Math.min(PILLARS.length - 1, Math.floor(progress * PILLARS.length));
+      setActive(idx);
+    };
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(updateActive);
+    };
+
+    updateActive();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
+
+  const pillar = PILLARS[active];
+
   return (
-    <section className="pillars">
+    <section
+      className="pillars"
+      ref={sectionRef}
+      style={{ height: `${PILLARS.length * 100}dvh` }}
+    >
       <div className="pillars__town" aria-hidden="true">
         {TOWN.map((b, i) => (
           // eslint-disable-next-line @next/next/no-img-element -- static asset, next/image è overkill qui
@@ -56,29 +127,31 @@ export default function Pillars() {
         ))}
       </div>
 
-      <div className="pillars__panel">
-        <div className="pillars__pillar">
-          <span className="pillars__pillar-label">{'// RISTORANTI'}</span>
-          {/* eslint-disable-next-line @next/next/no-img-element -- static asset, next/image è overkill qui */}
-          <img src="/brand/tavolo.svg" alt="" aria-hidden="true" className="pillars__pillar-icon" />
-          {/* non un <img>: background-image invece dell'elemento immagine,
-              stessa tecnica già usata per Wall.svg qui sopra — l'asset
-              (StrikeCream.svg) ha preserveAspectRatio="none" apposta, così
-              background-size può stirarlo in modo non uniforme (vedi
-              commento in pillars.css sul perché serve). */}
-          <div aria-hidden="true" className="pillars__pillar-strike" />
-          <p className="pillars__pillar-text">
-            I tavoli si liberano di continuo. Curius te lo dice nell&apos;istante in cui succede, nei locali vicino a te. Scegli e prenoti in un tocco.
-          </p>
-        </div>
-        <h2 className="pillars__pillar-heading">
-          Prenota il tavolo appena liberato.
-        </h2>
+      <div className="pillars__stage">
+        <div className="pillars__panel">
+          {/* key={active}: rimonta il blocco ad ogni cambio pilastro, che è
+              anche quello che innesca il fade-in via CSS (vedi pillars.css) */}
+          <div className="pillars__pillar" key={active}>
+            <span className="pillars__pillar-label">{pillar.label}</span>
+            {/* eslint-disable-next-line @next/next/no-img-element -- static asset, next/image è overkill qui */}
+            <img src={pillar.icon} alt="" aria-hidden="true" className="pillars__pillar-icon" />
+            {/* non un <img>: background-image invece dell'elemento immagine,
+                stessa tecnica già usata per Wall.svg qui sopra — l'asset
+                (StrikeCream.svg) ha preserveAspectRatio="none" apposta, così
+                background-size può stirarlo in modo non uniforme (vedi
+                commento in pillars.css sul perché serve). */}
+            <div aria-hidden="true" className="pillars__pillar-strike" />
+            <p className="pillars__pillar-text">{pillar.text}</p>
+          </div>
+          <h2 className="pillars__pillar-heading" key={`h-${active}`}>
+            {pillar.heading}
+          </h2>
 
-        <div className="pillars__dots" aria-hidden="true">
-          <span className="is-active" />
-          <span />
-          <span />
+          <div className="pillars__dots" aria-hidden="true">
+            {PILLARS.map((_, i) => (
+              <span key={i} className={i === active ? 'is-active' : undefined} />
+            ))}
+          </div>
         </div>
       </div>
     </section>

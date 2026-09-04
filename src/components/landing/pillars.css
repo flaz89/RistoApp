@@ -14,10 +14,21 @@
  */
 .pillars {
   position: relative;
-  min-height: 100dvh; /* dvh, non vh: sulle viewport mobile che aprono/chiudono barre non deve lasciare uno spiraglio di LiveMap visibile sotto */
+  /* Altezza = N pilastri * 100dvh, impostata inline da Pillars.tsx (unica
+     fonte di verità: la lunghezza dell'array PILLARS). Questa è la "corsia"
+     di scroll: .pillars__stage qui sotto resta agganciata in cima per tutta
+     questa corsia, e lo scroll dentro di essa fa avanzare il pilastro attivo
+     invece di scorrere la pagina — appena la corsia finisce, lo scroll torna
+     normale e la pagina prosegue. */
   background: var(--color-warm); /* stesso fondo del body (globals.css): opaco, copre LiveMap per intero */
+}
+
+.pillars__stage {
+  position: sticky;
+  top: 0;
+  height: 100dvh; /* dvh, non vh: sulle viewport mobile che aprono/chiudono barre non deve lasciare uno spiraglio di LiveMap visibile sotto */
   display: flex;
-  align-items: stretch; /* pannello ancorato in alto (margin-top) e steso fino al bordo inferiore della sezione, non alto solo quanto il contenuto */
+  align-items: stretch; /* pannello steso dal margin-top fino al bordo inferiore dello stage */
   justify-content: center;
   /*
    * NON overflow-x: clip qui — WebKit (Safari desktop e iOS, quindi anche
@@ -35,8 +46,8 @@
  * Stessa forma di .hero__panel (hero.css): angoli superiori smussati
  * ellittici, stesso margin-top di offset dal bordo. Width:100% perché qui,
  * a differenza di .hero__panel (block, riempie .hero da solo), il genitore
- * è un flex container (.pillars) — senza questo resterebbe largo quanto il
- * contenuto invece che bordo a bordo.
+ * è un flex container (.pillars__stage) — senza questo resterebbe largo
+ * quanto il contenuto invece che bordo a bordo.
  */
 .pillars__panel {
   position: relative;
@@ -57,19 +68,22 @@
   flex-direction: column; /* pillar e h2 impilati, non affiancati */
   align-items: center;
   justify-content: center;
+  overflow: hidden; /* il contenuto del pilastro attivo fa fade-in a ogni cambio (key React), non deve sporgere durante l'animazione */
 }
 
 /*
- * Contenuto di un singolo pilastro: etichetta mono, icona del pilastro,
- * sbarra decorativa sotto — impilati in colonna, centrati. Per ora un solo
- * pilastro dentro .pillars__panel, gli altri due arrivano in un giro
- * successivo (vedi TODO in cima al file).
+ * Contenuto del pilastro attivo: etichetta mono, icona, sbarra decorativa,
+ * testo — impilati in colonna, centrati. Pillars.tsx rimonta questo blocco
+ * (e l'h2 sotto) con key={active} a ogni cambio pilastro, cosa che questa
+ * animazione sfrutta per un fade-in automatico ad ogni remount — niente
+ * stato/JS per l'animazione stessa, solo per decidere QUALE pilastro mostrare.
  */
 .pillars__pillar {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 100px;
+  animation: pillars-fade-in 0.4s ease both;
   /* width:100% (non align-self:stretch): .pillars__panel è flex-direction
      row (default), dove align-items/align-self controllano l'asse
      trasversale VERTICALE, non la larghezza — stretch lì avrebbe stirato
@@ -104,6 +118,12 @@
   font-weight: 800;
   font-size: clamp(38px, 10.5vw, 58px); /* stessa size di .hero__quote, ereditata da "meglio" in hero.css */
   color: var(--color-warm);
+  animation: pillars-fade-in 0.4s ease both; /* stesso remount-fade di .pillars__pillar qui sopra, vedi commento lì */
+}
+
+@keyframes pillars-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .pillars__pillar-strike {
   width: 100%; /* 100% di .pillars__pillar, ora stretch sul pannello intero */
@@ -193,8 +213,8 @@
  * Indicatore slide dei 3 pilastri: barrette in fondo al pannello.
  * Spec dal Figma (node 98:180): 31x9px, radius 3, gap 15; attiva
  * --color-accent-2 (#F67700), inattive deep-orange #C55E00.
- * Statiche per ora (solo Ristoranti esiste): quando arrivano gli altri
- * due pilastri, la classe .is-active seguira lo scroll/slide attivo.
+ * .is-active segue l'indice del pilastro attivo, calcolato dallo scroll
+ * in Pillars.tsx (vedi commento su .pillars in cima al file).
  */
 .pillars__dots {
   display: flex;

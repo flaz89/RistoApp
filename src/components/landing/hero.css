@@ -150,13 +150,16 @@
  * scaglionavano con percentuali dentro i keyframe: difficile da ritarare
  * (cambiare un tempo voleva dire ricalcolare tutte le percentuali). Ora ogni
  * step ha il proprio delay/durata assoluti in secondi:
- *   0.4s            → "male" appare, fermo, senza sbarre
- *   3.4s (3s dopo)  → parte la sbarra 1 (0.7s, più lenta di prima)
- *   3.6s            → parte la sbarra 2, scaglionata di 0.2s per un effetto "a mano"
- *   4.3s            → finite le sbarre: male + sbarre sfumano, meglio scende (0.5s)
+ *   0s               → "male" appare, fermo, senza sbarre
+ *   1.0s             → parte la sbarra 1 (0.5s)
+ *   1.15s            → parte la sbarra 2, scaglionata di 0.15s per un effetto "a mano"
+ *   1.9s             → finite le sbarre: male + sbarre sfumano, meglio scende (0.5s)
+ *   ---
+ *   Ridotto da 4.3s a ~2.4s totali (05/09): oltre i ~3s molti utenti scrollavano
+ *   prima di vedere la punchline "meglio".
  */
-.flip__male   {font-family: var(--font-display); font-weight: 800; color: var(--hero-ink); animation: maleFade 0.5s ease 4.3s both; }
-.flip__meglio {font-family: var(--font-display); font-weight: 800; color: var(--hero-cream); opacity: 0; animation: meglioDrop 0.5s cubic-bezier(.2,.75,.2,1) 4.3s both; }
+.flip__male   {font-family: var(--font-display); font-weight: 800; color: var(--hero-ink); animation: maleFade 0.5s ease 1.9s both; }
+.flip__meglio {font-family: var(--font-display); font-weight: 800; color: var(--hero-cream); opacity: 0; animation: meglioDrop 0.5s cubic-bezier(.2,.75,.2,1) 1.9s both; }
 /*
  * strike1/strike2 sono l'SVG disegnato a mano (public/icons/StrikeHero.svg,
  * già riempito con --hero-strike), non più una barra CSS — niente classe
@@ -185,13 +188,13 @@
   position: absolute; top: 78%; left: -10%; width: 130%; max-width: none; height: auto;
   transform-origin: left bottom; /* pivot in basso a sinistra... */
   transform: rotate(-22deg) scaleX(0); /* ...cresce verso l'alto a destra */
-  animation: strike1 0.7s ease 3.4s both, strikeFadeOut 0.5s ease 4.3s both;
+  animation: strike1 0.5s ease 1.0s both, strikeFadeOut 0.5s ease 1.9s both;
 }
 .strike2 {
   position: absolute; top: 8%; left: -10%; width: 130%; max-width: none; height: auto;
   transform-origin: left top; /* pivot in alto a sinistra... */
   transform: rotate(22deg) scaleX(0); /* ...cresce verso il basso a destra (verso opposto a strike1) */
-  animation: strike2 0.7s ease 3.6s both, strikeFadeOut 0.5s ease 4.3s both;
+  animation: strike2 0.5s ease 1.15s both, strikeFadeOut 0.5s ease 1.9s both;
 }
 
 @keyframes maleFade { from{color:var(--hero-ink)} to{color:transparent} }
@@ -204,7 +207,7 @@
   display: inline-flex; align-items: center; gap: 10px;
   margin-top: clamp(28px, 6vw, 46px);
   font-family: var(--font-display); font-weight: 800;
-  font-size: clamp(20px, 4vw, 18px);
+  font-size: clamp(18px, 2.2vw, 22px);
   color: var(--hero-ink); background: var(--hero-cream);
   padding: clamp(13px, 3.4vw, 17px) clamp(26px, 6vw, 40px);
   border-radius: 14px; text-decoration: none;

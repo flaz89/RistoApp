@@ -17,9 +17,9 @@ import './hero.css';
  */
 
 const SUB = [
-  "L'occasione prima che sparisca.",
   'Il tavolo appena liberato.',
-  'Il ritiro senza fila.',
+  "L'ordine pronto quando arrivi.",
+  "L'occasione prima che sparisca.",
 ];
 
 export default function Hero() {
@@ -28,7 +28,7 @@ export default function Hero() {
       <div className="hero__bar">
         <Link href="/" className="hero__wm" aria-label="Curius">
           {/* eslint-disable-next-line @next/next/no-img-element -- static SVG wordmark, next/image is overkill */}
-          <img src="/logos/CuriusBrand_Logo.svg" alt="Curius" className="hero__wm-logo" />
+          <img src="/logos/CuriusBrand_Logo.svg" alt="" className="hero__wm-logo" />
         </Link>
 
         {/* Checkbox-hack per il menu mobile: niente JS/stato, quindi Hero
@@ -43,18 +43,18 @@ export default function Hero() {
 
         {/* Link placeholder, non portano ancora a nulla — pagine reali da definire. */}
         <nav className="hero__nav" aria-label="Sezioni">
-          <a href="#" className="hero__nav-link">Manifesto</a>
-          <a href="#" className="hero__nav-link">Bottega</a>
-          <a href="#" className="hero__nav-link">Città</a>
-          <a href="#" className="hero__nav-link">Diario</a>
+          <span className="hero__nav-link" aria-disabled="true" role="link">Manifesto</span>
+          <span className="hero__nav-link" aria-disabled="true" role="link">Bottega</span>
+          <span className="hero__nav-link" aria-disabled="true" role="link">Città</span>
+          <span className="hero__nav-link" aria-disabled="true" role="link">Diario</span>
         </nav>
 
-        <Link href="/accedi" className="hero__signin">Accedi</Link>
+        <Link href="/accedi" className="hero__signin">Entra</Link>
       </div>
 
       <div className="hero__panel">
         <div className="hero__inner">
-          <h1 className="hero__quote no select-none">
+          <h1 className="hero__quote select-none">
             &ldquo;Chi tardi arriva,{' '}
             <br></br>
             <span className="flip">

@@ -203,7 +203,7 @@
   display: inline-flex; align-items: center; gap: 10px;
   white-space: nowrap; /* wrap-to-fit dello shrink-to-fit su assoluto con solo `left` impostato: senza questo "Curiosa" va a capo sotto ~contenitore/2 */
   font-family: var(--font-display); font-weight: 800;
-  font-size: clamp(20px, 4vw, 18px);
+  font-size: clamp(18px, 2.2vw, 22px);
   color: var(--color-warm);
   padding: clamp(13px, 3.4vw, 17px) clamp(26px, 6vw, 40px);
   border-radius: 14px; text-decoration: none;

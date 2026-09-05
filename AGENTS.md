@@ -1,7 +1,9 @@
-# RistoApp — agent notes
+# Curius (ex-RistoApp) — agent notes
 
 **The source of truth for stack, commands and conventions is [CLAUDE.md](./CLAUDE.md).**
 Read it first; this file only carries tooling-generated blocks that must stay in place.
+
+Il progetto è pivotato il **05/09/2026** dal modello ristoranti al **POC shops** — ragionamento, playbook pilota, metriche di successo e feature backlog vivono nella project memory Cowork (fonte di verità di prodotto), non qui. CLAUDE.md li elenca in cima.
 
 ---
 

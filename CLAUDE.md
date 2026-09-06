@@ -81,3 +81,21 @@ Per eseguire le migrazioni fuori da Supabase (test locale) serve uno stub dello 
 Flavio è sviluppatore web e Unreal Engine. Conosce bene il frontend, **non è esperto di backend e sta usando questo progetto anche per impararlo**.
 
 Quindi: nelle spiegazioni di backend (SQL, auth, RLS, deploy) esplicitare il *perché* e il concetto sottostante, non solo i passi da eseguire. Su task semplici essere concisi; su task complesse argomentare bene, anche con metafore. Non dare per scontata la terminologia backend/devops.
+
+## Handoff di sessione
+
+Gli handoff `ce-handoff` vivono in `.compound/handoffs/`, **non versionati** (in .gitignore) — sono note operative locali di continuità, non documentazione di progetto (quella sta in project memory).
+
+**Regola invariante**: massimo **2 file** in `.compound/handoffs/` alla volta.
+
+Quando crei un nuovo handoff:
+1. Genera il file nuovo `.compound/handoffs/YYYY-MM-DD-slug.md`
+2. **Cancella tutti gli handoff eccedenti**, tenendo solo i 2 più recenti (il nuovo + quello immediatamente precedente).
+
+Comando one-liner per la potatura (esegui dal repo root dopo aver creato il nuovo handoff):
+
+```bash
+ls -t .compound/handoffs/*.md 2>/dev/null | tail -n +3 | xargs -r rm
+```
+
+Il "penultimo" resta come safety net se il nuovo handoff dimentica qualcosa; qualsiasi cosa più vecchia è rumore.

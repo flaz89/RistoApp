@@ -55,3 +55,9 @@ business/
 # MapLibre worker files copied into public/ by pre(dev|build) (derived, not source)
 /public/maplibre-gl-worker.mjs
 /public/maplibre-gl-shared.mjs
+
+# Session handoffs (local, non-versioned — see CLAUDE.md §Handoff)
+.compound/handoffs/
+
+# Claude CLI local settings (per-machine)
+.claude/

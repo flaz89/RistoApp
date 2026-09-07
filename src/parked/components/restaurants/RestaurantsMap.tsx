@@ -22,7 +22,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 setWorkerUrl('/maplibre-gl-worker.mjs');
 
 import { formatDistance, formatSpend } from '@/lib/format';
-import type { NearbyRestaurant } from '@/lib/restaurants/nearby';
+import type { NearbyRestaurant } from '@/parked/lib/restaurants/nearby';
 
 import type { Category } from './RestaurantsChrome';
 import { RestaurantLogo } from './RestaurantLogo';

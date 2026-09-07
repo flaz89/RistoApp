@@ -4,18 +4,18 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-import { RestaurantList } from '@/components/restaurants/RestaurantList';
-import { RestaurantsChrome, type Category } from '@/components/restaurants/RestaurantsChrome';
-import { RestaurantsSheet, type SheetSnap } from '@/components/restaurants/RestaurantsSheet';
+import { RestaurantList } from '@/parked/components/restaurants/RestaurantList';
+import { RestaurantsChrome, type Category } from '@/parked/components/restaurants/RestaurantsChrome';
+import { RestaurantsSheet, type SheetSnap } from '@/parked/components/restaurants/RestaurantsSheet';
 import { useGeolocation } from '@/lib/geo/useGeolocation';
-import type { NearbyRestaurant } from '@/lib/restaurants/nearby';
-import { fetchNearbyRestaurants } from '@/lib/restaurants/nearby';
+import type { NearbyRestaurant } from '@/parked/lib/restaurants/nearby';
+import { fetchNearbyRestaurants } from '@/parked/lib/restaurants/nearby';
 import { useViewMode } from '@/lib/ui/useViewMode';
 
 // MapLibre touches `window` on import, so it must never run on the server.
 // ssr:false keeps it a browser-only component; the fallback is the bare ground.
 const RestaurantsMap = dynamic(
-  () => import('@/components/restaurants/RestaurantsMap').then((m) => m.RestaurantsMap),
+  () => import('@/parked/components/restaurants/RestaurantsMap').then((m) => m.RestaurantsMap),
   { ssr: false, loading: () => <div className="absolute inset-0 bg-page" /> },
 );
 

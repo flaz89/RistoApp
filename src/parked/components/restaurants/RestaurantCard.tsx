@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { formatDistance, formatSpend } from '@/lib/format';
-import type { NearbyRestaurant } from '@/lib/restaurants/nearby';
+import type { NearbyRestaurant } from '@/parked/lib/restaurants/nearby';
 import type { ViewMode } from '@/lib/ui/useViewMode';
 
 import { RestaurantLogo } from './RestaurantLogo';

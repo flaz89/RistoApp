@@ -1,6 +1,6 @@
 'use client';
 
-import type { NearbyRestaurant } from '@/lib/restaurants/nearby';
+import type { NearbyRestaurant } from '@/parked/lib/restaurants/nearby';
 import type { ViewMode } from '@/lib/ui/useViewMode';
 
 import type { Category } from './RestaurantsChrome';

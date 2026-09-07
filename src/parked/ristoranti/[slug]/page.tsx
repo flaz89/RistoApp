@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { RestaurantLogo } from '@/components/restaurants/RestaurantLogo';
+import { RestaurantLogo } from '@/parked/components/restaurants/RestaurantLogo';
 import { formatSpend } from '@/lib/format';
-import { fetchRestaurantBySlug } from '@/lib/restaurants/detail';
+import { fetchRestaurantBySlug } from '@/parked/lib/restaurants/detail';
 
 /**
  * A SERVER component, unlike the list page.

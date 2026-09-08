@@ -11,12 +11,15 @@ type Pillar = { label: string; icon: string; text: string; heading: string };
  * I 3 pilastri.
  */
 const PILLARS: Pillar[] = [
+  /* RIS-48: pivot POC, ristoranti in stand-by — pilastro nascosto per ora
+   * (non solo badge "in arrivo"), vedi feature_backlog.md per quando torna.
   {
     label: '// RISTORANTI',
     icon: '/brand/tavolo.svg',
     text: "I tavoli si liberano di continuo. Curius te lo dice nell'istante in cui succede, nei locali vicino a te. Scegli e prenoti in un tocco.",
     heading: 'Prenota il tavolo appena liberato.',
   },
+  */
   {
     label: '// NEGOZI',
     icon: '/brand/negozio.svg',

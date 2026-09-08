@@ -17,7 +17,6 @@ import './hero.css';
  */
 
 const SUB = [
-  'Il tavolo appena liberato.',
   "L'ordine pronto quando arrivi.",
   "L'occasione prima che sparisca.",
 ];
@@ -71,7 +70,7 @@ export default function Hero() {
             alloggia&rdquo;
           </h1>
 
-          <Link href="/ristoranti" className="hero__cta">
+          <Link href="/esplora" className="hero__cta">
             Curiosa
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M5 12h14M13 6l6 6-6 6" />

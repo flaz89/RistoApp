@@ -149,7 +149,7 @@ export default function LiveMap() {
         <div className="live-map__cta-wrap">
           <p className="live-map__tagline">Tutto quello che succede. Mentre succede.</p>
 
-          <Link href="/ristoranti" className="live-map__cta">
+          <Link href="/esplora" className="live-map__cta">
             A due passi da te. Ora
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M5 12h14M13 6l6 6-6 6" />

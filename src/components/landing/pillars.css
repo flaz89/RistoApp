@@ -92,10 +92,15 @@
      al pannello intero con width:100% sul proprio. */
 }
 .pillars__pillar-label {
-  color: var(--color-warm);
+  color: var(--color-accent-2);
   font-family: var(--font-mono);
   font-weight: 400;
   font-size: clamp(13px, 3.4vw, 16px);
+  /* .pillars__pillar (il genitore) è flex column con align-items:center,
+     quindi centra il BOX del label sull'asse trasversale: text-align da solo
+     non basta perché lo span è largo quanto il contenuto (shrink-to-fit).
+     align-self lo sgancia dal centering del genitore. */
+  align-self: flex-start;
 }
 .pillars__pillar-icon {
   width: clamp(140px, 22vw, 320px);
@@ -226,6 +231,25 @@
   width: 31px;
   height: 9px;
   border-radius: 3px;
-  background: #C55E00;
+  background: #C55E00; /* bordo per evitare che il colore di sfondo del pannello (var(--color-warm)) traspaia quando lo span è piccolo e arrotondato */
 }
-.pillars__dots span.is-active { background: var(--color-accent-2); }
+.pillars__dots span.is-active { 
+  background: var(--color-accent-2);
+  box-shadow: 0 0px 20px var(--color-accent-2); 
+}
+
+/*
+ * Trattino OCCASIONI (il pilastro con expand:true in Pillars.tsx, l'unico
+ * arancione) che "esplode" a coprire tutto lo schermo mentre lo attraversi
+ * in scroll. width/height/top/left/border-radius impostati DIRETTAMENTE in
+ * px da Pillars.tsx ad ogni frame di scroll (niente transform:scale — su un
+ * box minuscolo come questo scalarlo via transform lo fa compositare a bassa
+ * risoluzione e ingrandisce quel bitmap, bordi sgranati; con box reale il
+ * browser ridisegna il rettangolo arrotondato nitido a qualunque dimensione).
+ */
+.pillars__blast {
+  position: fixed;
+  z-index: 10; /* landing v2 non ha header/nav fixed, più di .hero__inner (z-index:4, hero.css) basta */
+  background: var(--color-accent-2);
+  pointer-events: none;
+}

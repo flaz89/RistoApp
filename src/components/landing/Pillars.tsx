@@ -5,7 +5,16 @@ import './pillars.css';
 
 type Building = { icon: string; left: string; w: string; dy?: number; shadow?: string };
 
-type Pillar = { label: string; icon: string; text: string; heading: string };
+type Pillar = {
+  label: string;
+  icon: string;
+  text: string;
+  heading: string;
+  /** Questo pilastro "invade" lo schermo: mentre lo attraversi in scroll, il
+   *  suo trattino nei dots (.pillars__dots) cresce da dov'è fino a coprire
+   *  tutto il viewport — vedi .pillars__blast in pillars.css. */
+  expand?: boolean;
+};
 
 /*
  * I 3 pilastri.
@@ -31,8 +40,16 @@ const PILLARS: Pillar[] = [
     icon: '/brand/occasione.svg',
     text: 'Offerte lampo, ultimi pezzi, promozioni che durano poche ore. Le vedi apparire sulla mappa e le prendi al volo.',
     heading: 'Prendila prima che sparisca.',
+    expand: true,
   },
 ];
+
+// Indice dell'unico pilastro con expand:true — calcolato una volta sola,
+// non ad ogni frame di scroll dentro updateActive().
+const EXPAND_IDX = PILLARS.findIndex((p) => p.expand);
+// Frazione (0–1) del segmento di scroll del pilastro expand da tenere ferma
+// prima che l'esplosione del dot inizi — tempo per leggere il pilastro.
+const EXPAND_HOLD = 0.35;
 
 /*
  * Skyline sul bordo superiore di Pillars — stessa meccanica della fascia di
@@ -70,6 +87,8 @@ const TOWN: Building[] = [
  */
 export default function Pillars() {
   const sectionRef = useRef<HTMLElement>(null);
+  const blastRef = useRef<HTMLDivElement>(null);
+  const dotRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [active, setActive] = useState(0);
 
   useEffect(() => {
@@ -86,8 +105,65 @@ export default function Pillars() {
       const scrollable = rect.height - window.innerHeight;
       if (scrollable <= 0) return;
       const progress = Math.min(1, Math.max(0, -rect.top / scrollable));
-      const idx = Math.min(PILLARS.length - 1, Math.floor(progress * PILLARS.length));
+      const raw = progress * PILLARS.length;
+      const idx = Math.min(PILLARS.length - 1, Math.floor(raw));
       setActive(idx);
+
+      // Progresso (0→1) dentro il segmento di scroll del pilastro attivo.
+      // Guida .pillars__blast via CSS var direttamente sul DOM (niente stato
+      // React: cambia ad ogni frame di scroll, un re-render qui sarebbe
+      // sprecato).
+      const blastEl = blastRef.current;
+      const dotEl = EXPAND_IDX === -1 ? null : dotRefs.current[EXPAND_IDX];
+      if (blastEl && dotEl) {
+        const segmentProgress = Math.min(1, Math.max(0, raw - idx));
+        // Le prime EXPAND_HOLD di scroll dentro il segmento restano ferme sul
+        // pilastro normale (tempo per leggerlo) — solo dopo la soglia
+        // l'esplosione parte, e si consuma nello scroll che resta.
+        const expand = idx === EXPAND_IDX
+          ? Math.min(1, Math.max(0, (segmentProgress - EXPAND_HOLD) / (1 - EXPAND_HOLD)))
+          : 0;
+
+        // Il pannello è sticky e fermo durante questo segmento di scroll,
+        // quindi il rect del trattino è stabile — ma lo rimisuriamo ad ogni
+        // tick (invece che una volta sola) così regge anche un resize/rotate
+        // a metà animazione senza bisogno di un listener separato.
+        const dotRect = dotEl.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        // Cresce mantenendo le proporzioni del dot (width/height/border-radius
+        // scalati dallo STESSO fattore, non un clip/stretch indipendente per
+        // lato) E scivola dal centro del dot verso il centro del viewport
+        // mentre expand avanza — non solo scala da ferma. Il dot è in basso:
+        // scalando da un centro fisso il lato lontano (in alto) resterebbe
+        // scoperto fino quasi alla fine dell'animazione; far viaggiare anche
+        // il centro rende la copertura dello schermo più omogenea.
+        // width/height/top/left reali (non transform: scale) perché scalare
+        // via transform un box minuscolo lo fa compositare a bassa
+        // risoluzione e ingrandisce quel bitmap — bordi sgranati. Con box
+        // reale il browser ridisegna il rettangolo arrotondato nitido ad
+        // ogni frame, qualunque sia la dimensione.
+        const dotCenterX = dotRect.left + dotRect.width / 2;
+        const dotCenterY = dotRect.top + dotRect.height / 2;
+        const targetCenterX = vw / 2;
+        const targetCenterY = vh / 2;
+        // Fattore di scala per coprire il viewport da CENTRATO (come
+        // background-size:cover): più piccolo/naturale di quello servirebbe
+        // scalando da un angolo, perché il centro nel frattempo si è mosso lì.
+        const scaleMax = Math.max(vw / dotRect.width, vh / dotRect.height) * 1.02;
+        const scale = 1 + (scaleMax - 1) * expand;
+        const width = dotRect.width * scale;
+        const height = dotRect.height * scale;
+        const centerX = dotCenterX + (targetCenterX - dotCenterX) * expand;
+        const centerY = dotCenterY + (targetCenterY - dotCenterY) * expand;
+
+        blastEl.style.width = `${width}px`;
+        blastEl.style.height = `${height}px`;
+        blastEl.style.left = `${centerX - width / 2}px`;
+        blastEl.style.top = `${centerY - height / 2}px`;
+        blastEl.style.borderRadius = `${3 * scale}px`; /* stesso raggio-base di .pillars__dots span, scalato insieme al resto */
+      }
     };
     const onScroll = () => {
       if (ticking) return;
@@ -112,6 +188,18 @@ export default function Pillars() {
       ref={sectionRef}
       style={{ height: `${PILLARS.length * 100}dvh` }}
     >
+      {/* Trattino dei dots (index EXPAND_IDX) che cresce a coprire tutto il
+          viewport — vedi .pillars__blast in pillars.css e la misura via
+          dotRefs/blastRef qui sopra. Fixed e fuori da .pillars__stage così
+          non è tagliato dall'overflow:hidden di .pillars__panel. Montato solo
+          mentre OCCASIONI è il pilastro attivo: a expand:0 sta esatto sopra
+          il suo dot (stesso accent-2 che avrebbe già .is-active lì), quindi
+          nessuno scatto al mount — ma se restasse montato sempre coprirebbe
+          quel dot anche con NEGOZI attivo, facendolo sembrare acceso. */}
+      {active === EXPAND_IDX && (
+        <div className="pillars__blast" ref={blastRef} aria-hidden="true" />
+      )}
+
       <div className="pillars__town" aria-hidden="true">
         {TOWN.map((b, i) => (
           // eslint-disable-next-line @next/next/no-img-element -- static asset, next/image è overkill qui
@@ -152,7 +240,11 @@ export default function Pillars() {
 
           <div className="pillars__dots" aria-hidden="true">
             {PILLARS.map((_, i) => (
-              <span key={i} className={i === active ? 'is-active' : undefined} />
+              <span
+                key={i}
+                ref={(el) => { dotRefs.current[i] = el; }}
+                className={i === active ? 'is-active' : undefined}
+              />
             ))}
           </div>
         </div>

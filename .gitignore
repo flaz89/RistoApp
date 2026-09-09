@@ -61,3 +61,6 @@ business/
 
 # Claude CLI local settings (per-machine)
 .claude/
+
+# CE plans / local docs (non-versioned)
+docs/

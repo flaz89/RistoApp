@@ -1,0 +1,170 @@
+/*
+ * ComeFunziona (landing v2) — 3 step affiancati. Vive DENTRO .pillars__blast
+ * (position:fixed, arancio pieno — pillars.css), non come sezione a sé: è il
+ * layer che appare sopra logo+scritta una volta che quelli hanno finito di
+ * scorrere via (tailProgress in Pillars.tsx).
+ *
+ * position + z-index sono suoi apposta, non decisi da chi la monta
+ * (Pillars.tsx si limita a montarla/smontarla) — così la sezione resta
+ * autonoma per quando in futuro uscirà dal blast per diventare una sezione
+ * vera con la sua altezza in flow.
+ *
+ * position:fixed e NON absolute: il blast a espansione completa è molto più
+ * largo del viewport (scala da un dot minuscolo fino a coprirlo, quindi il
+ * lato "in eccesso" sfora parecchio, vedi scaleMax in Pillars.tsx). Con
+ * inset:0 su absolute questa sezione ereditava quella larghezza gigante: il
+ * contenuto restava centrato sul BOX, non sullo schermo, e su mobile — dove
+ * gli step si impilano a piena larghezza — i testi finivano tagliati fuori
+ * dai bordi. Fixed la ancora al viewport, qualunque sia la misura del blast.
+ * Non viene ritagliata dall'overflow:hidden del blast (un fixed ha il
+ * viewport come containing block: quel clip non lo tocca), e comunque a
+ * quel punto il blast copre già tutto lo schermo.
+ *
+ * Niente background qui: il fondo arancione di .pillars__blast (il
+ * genitore) deve restare visibile attraverso questo layer — è la richiesta
+ * esplicita, non una svista.
+ */
+.come-funziona {
+  position: fixed;
+  inset: 0;
+  z-index: 1; /* sopra .pillars__blast-content, entrambi figli di .pillars__blast (fixed, la sua stacking context) */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(24px, 5vh, 56px);
+  padding: clamp(24px, 5vw, 64px);
+  color: var(--color-screen-2); /* warm charcoal, non --color-ink: in questo tema "ink" è la crema (#F2ECE0), invisibile sull'arancio del blast */
+}
+
+.come-funziona__heading {
+  margin: 0;
+  font-family: var(--font-display); /* stesso font-display+800 dei titoli della landing, vedi .pillars__pillar-heading */
+  font-weight: 800;
+  color: var(--color-warm);
+  font-size: clamp(34px, 7vw, 64px);
+  text-align: center;
+}
+
+.come-funziona__steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  gap: clamp(16px, 4vw, 48px);
+  width: 100%;
+  max-width: 1100px;
+  align-items: start;
+}
+
+/*
+ * Reveal sfalsato guidato dallo scroll: --cf (0→1) è impostata da
+ * Pillars.tsx su .pillars__blast ad ogni frame, --i è l'indice dello step
+ * (inline nel TSX). Ogni step consuma 0.2 di corsia partendo da i*0.2,
+ * quindi l'ultimo è dentro a --cf 0.6: il resto della corsia resta come
+ * margine, così nessuno step dipende dall'ultimo pixel scrollabile della
+ * pagina (era esattamente il bug del reveal precedente).
+ *
+ * Niente transition: --t è già una funzione continua dello scroll, esattamente
+ * come lo slide di .pillars__blast-content — animarla sopra la sfaserebbe
+ * dallo scroll invece di seguirlo. Per lo stesso motivo non serve un
+ * fallback prefers-reduced-motion: senza scroll dell'utente non si muove nulla.
+ */
+.come-funziona__step {
+  /* --u: "tempo" dello step, non clampato — 0 quando tocca a lui entrare, 1
+     quando è pieno, e oltre 1 mentre il successivo sta entrando (serve alla
+     variante mobile qui sotto per farlo uscire). Passo 0.25 di corsia a
+     testa: l'ultimo è dentro a --cf 0.75, il resto resta margine.
+     --in: la sola fase di ingresso, 0→1. */
+  --u: calc((var(--cf, 0) - var(--i) * 0.25) / 0.25);
+  /* L'ingresso consuma solo la prima frazione (0.4) dello slot, non tutto:
+     il resto è pausa a piena opacità, altrimenti lo step arriva a 1 e
+     riparte subito a uscire — che è quello che li faceva sembrare
+     sovrapposti. Stessa frazione per l'uscita mobile, così il crossfade
+     con il successivo resta simmetrico. */
+  --in: clamp(0, calc(var(--u) / 0.4), 1);
+  flex: 1;
+  opacity: var(--in);
+  transform: translateY(calc((1 - var(--in)) * 32px));
+}
+
+.come-funziona__step-n {
+  display: block;
+  font-family: var(--font-mono); /* stessa resa delle altre etichette-codice della landing (.pillars__pillar-label, hero) */
+  font-weight: 400;
+  font-size: clamp(18px, 5vw, 24px);
+  line-height: 1;
+  opacity: 0.55;
+}
+
+/* Altezza fissa (non auto): le 3 brand SVG hanno viewBox diversi, senza
+   questo i titoli non si allineerebbero fra loro sulla riga desktop. */
+.come-funziona__step-icon {
+  display: block;
+  height: clamp(200px, 7vw, 184px);
+  width: auto;
+  margin-top: 0.35em;
+}
+
+.come-funziona__step-title {
+  margin: 0.4em 0 0.3em;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--color-warm);
+  font-size: clamp(25px, 2.4vw, 38px);
+}
+
+.come-funziona__step-text {
+  margin: 0;
+  font-size: clamp(14px, 1.5vw, 18px);
+  line-height: 1.5;
+}
+
+/* Sotto il tablet i 3 step non stanno affiancati leggibili: impilati. */
+@media (max-width: 819px) {
+  /*
+   * Non una colonna di 3: impilati in flow occupavano più di 100dvh e
+   * venivano tagliati. Qui gli step sono SOVRAPPOSTI al centro dello
+   * schermo e si danno il cambio — ne sta a video uno alla volta, quindi
+   * l'altezza non è più un vincolo. Il container serve solo da riferimento
+   * di posizionamento, il layout lo fanno i figli assoluti.
+   */
+  .come-funziona__steps {
+    display: block;
+    position: relative;
+    flex: 1;
+  }
+  /*
+   * --out: fase di uscita, 0→1 mentre lo step SUCCESSIVO fa il suo ingresso
+   * (--u da 1 a 2 coincide con --in del successivo da 0 a 1) — è questo che
+   * rende il cambio un crossfade e non due animazioni scollegate.
+   * Sull'ultimo resta 0: non ha un successore che lo sostituisca, quindi
+   * deve restare a video fino in fondo alla corsia.
+   */
+  .come-funziona__step {
+    --out: 0;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    opacity: calc(var(--in) - var(--out));
+    /* -50% centra, il resto è il viaggio: entra da 15vh sotto il centro,
+       esce a 15vh sopra. */
+    transform: translateY(calc(-50% + (1 - var(--in) - var(--out)) * 15vh));
+  }
+  .come-funziona__step:not(:last-child) {
+    --out: clamp(0, calc((var(--u) - 1) / 0.4), 1);
+  }
+  /* Impilati, l'asse di lettura è il centro della colonna, non il bordo
+     sinistro: icona/titolo/testo si allineano lì. Il numerale no, resta
+     ancorato a sinistra come indice della sequenza. */
+  .come-funziona__step {
+    text-align: center;
+  }
+  .come-funziona__step-n {
+    text-align: left;
+  }
+  .come-funziona__step-icon {
+    margin-inline: auto; /* è display:block, text-align non lo sposta */
+  }
+}

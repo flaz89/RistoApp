@@ -252,12 +252,33 @@
   z-index: 10; /* landing v2 non ha header/nav fixed, più di .hero__inner (z-index:4, hero.css) basta */
   background: var(--color-accent-2);
   pointer-events: none;
+  overflow: hidden; /* il contenuto non deve sporgere finché il box è ancora piccolo */
+  /*
+   * Non più flex qui: contiene .pillars__blast-content (logo+scritta),
+   * posizionato in absolute — quindi serve solo come contenitore di
+   * posizionamento (già lo è, essendo fixed), non come suo layout diretto.
+   */
+}
+
+/*
+ * Logo + "Come funziona?": il layout flex che prima stava su .pillars__blast
+ * vive qui. transform/opacity NON sono transition CSS — sono impostati
+ * DIRETTAMENTE sul DOM da Pillars.tsx (tailProgress) ad ogni frame di
+ * scroll, esattamente come width/height di .pillars__blast qui sopra: lo
+ * slide-via segue lo scroll dell'utente frame per frame, e può iniziare
+ * solo a scritta finita perché fino ad allora lo scroll è bloccato
+ * (lockedRef in Pillars.tsx, wheel/touchmove con preventDefault) — non un
+ * timer che parte da solo. Per questo qui non serve un fallback
+ * prefers-reduced-motion: senza scroll dell'utente non si muove nulla, di suo.
+ */
+.pillars__blast-content {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
   gap: clamp(12px, 2.5vw, 24px);
-  overflow: hidden; /* il contenuto non deve sporgere finché il box è ancora piccolo */
 }
 
 /*

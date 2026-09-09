@@ -50,6 +50,15 @@ const EXPAND_IDX = PILLARS.findIndex((p) => p.expand);
 // Frazione (0–1) del segmento di scroll del pilastro expand da tenere ferma
 // prima che l'esplosione del dot inizi — tempo per leggere il pilastro.
 const EXPAND_HOLD = 0.35;
+// A che punto dell'espansione (0–1) la scritta dentro il blast comincia a
+// comparire: prima di così il box è ancora troppo piccolo per contenerla.
+const REVEAL_AT = 0.85;
+// Frazione finale del segmento in cui l'espansione è GIÀ completa. Serve
+// perché Pillars è l'ultima sezione della pagina: senza questa coda,
+// expand===1 cadrebbe esattamente sull'ultimo pixel di scroll disponibile —
+// fermarsi un pixel prima (inerzia del trackpad) e non vedi mai né lo
+// schermo pieno né la scritta che ci compare sopra.
+const EXPAND_TAIL = 0.2;
 
 /*
  * Skyline sul bordo superiore di Pillars — stessa meccanica della fascia di
@@ -90,6 +99,9 @@ export default function Pillars() {
   const blastRef = useRef<HTMLDivElement>(null);
   const dotRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const [active, setActive] = useState(0);
+  // true quando il dot ha finito di coprire lo schermo: monta la scritta, e
+  // il mount è ciò che fa partire l'animazione a macchina da scrivere (CSS).
+  const [blastFull, setBlastFull] = useState(false);
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -115,15 +127,20 @@ export default function Pillars() {
       // sprecato).
       const blastEl = blastRef.current;
       const dotEl = EXPAND_IDX === -1 ? null : dotRefs.current[EXPAND_IDX];
-      if (blastEl && dotEl) {
-        const segmentProgress = Math.min(1, Math.max(0, raw - idx));
-        // Le prime EXPAND_HOLD di scroll dentro il segmento restano ferme sul
-        // pilastro normale (tempo per leggerlo) — solo dopo la soglia
-        // l'esplosione parte, e si consuma nello scroll che resta.
-        const expand = idx === EXPAND_IDX
-          ? Math.min(1, Math.max(0, (segmentProgress - EXPAND_HOLD) / (1 - EXPAND_HOLD)))
-          : 0;
 
+      const segmentProgress = Math.min(1, Math.max(0, raw - idx));
+      // Le prime EXPAND_HOLD di scroll dentro il segmento restano ferme sul
+      // pilastro normale (tempo per leggerlo), le ultime EXPAND_TAIL sono già
+      // a schermo pieno: l'esplosione si consuma solo nel tratto in mezzo.
+      const expand = idx === EXPAND_IDX
+        ? Math.min(1, Math.max(0, (segmentProgress - EXPAND_HOLD) / (1 - EXPAND_HOLD - EXPAND_TAIL)))
+        : 0;
+      // Calcolato FUORI dal guard qui sotto (non serve il DOM) così torna a
+      // false anche quando il blast non è montato: è quello che fa ripartire
+      // da capo la macchina da scrivere se si risale e si riscende.
+      setBlastFull(expand >= 1);
+
+      if (blastEl && dotEl) {
         // Il pannello è sticky e fermo durante questo segmento di scroll,
         // quindi il rect del trattino è stabile — ma lo rimisuriamo ad ogni
         // tick (invece che una volta sola) così regge anche un resize/rotate
@@ -163,6 +180,12 @@ export default function Pillars() {
         blastEl.style.left = `${centerX - width / 2}px`;
         blastEl.style.top = `${centerY - height / 2}px`;
         blastEl.style.borderRadius = `${3 * scale}px`; /* stesso raggio-base di .pillars__dots span, scalato insieme al resto */
+        // Opacità della scritta: 0 fino a REVEAL_AT, poi 0→1 sul tratto che
+        // resta, così entra solo quando il box copre già quasi tutto.
+        blastEl.style.setProperty(
+          '--reveal',
+          `${Math.min(1, Math.max(0, (expand - REVEAL_AT) / (1 - REVEAL_AT)))}`,
+        );
       }
     };
     const onScroll = () => {
@@ -197,7 +220,20 @@ export default function Pillars() {
           nessuno scatto al mount — ma se restasse montato sempre coprirebbe
           quel dot anche con NEGOZI attivo, facendolo sembrare acceso. */}
       {active === EXPAND_IDX && (
-        <div className="pillars__blast" ref={blastRef} aria-hidden="true" />
+        <div className="pillars__blast" ref={blastRef} aria-hidden="true">
+          {/* Placeholder: quando arriva il contenuto vero di "come funziona"
+              va in una sezione sua, non qui dentro — questo layer è
+              decorativo (aria-hidden), quindi invisibile agli screen reader. */}
+          <div className="pillars__blast-logo" />
+          {/* Montata solo a espansione completa: è il mount a far partire
+              l'animazione a macchina da scrivere (vedi pillars.css). Se il
+              testo cambia, aggiornare il conteggio degli step lì. */}
+          {blastFull && (
+            <p className="pillars__blast-title">
+              <span className="pillars__blast-typed">Come funziona?</span>
+            </p>
+          )}
+        </div>
       )}
 
       <div className="pillars__town" aria-hidden="true">

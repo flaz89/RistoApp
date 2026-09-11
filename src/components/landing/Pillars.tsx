@@ -39,7 +39,7 @@ const PILLARS: Pillar[] = [
   {
     label: '// OCCASIONI',
     icon: '/brand/occasione.svg',
-    text: 'Offerte lampo, ultimi pezzi, promozioni che durano poche ore. Le vedi apparire sulla mappa e le prendi al volo.',
+    text: 'Offerte lampo, promozioni che durano poche ore. Le vedi apparire sulla mappa e le prendi al volo.',
     heading: 'Prendila prima che sparisca.',
     expand: true,
   },

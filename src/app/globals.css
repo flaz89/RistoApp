@@ -47,6 +47,7 @@
   --font-display: var(--font-baloo), ui-rounded, system-ui, sans-serif;
   --font-sans:    var(--font-manrope), system-ui, sans-serif;
   --font-mono:    var(--font-jetbrains), ui-monospace, monospace;
+  --font-roman:   var(--font-cinzel), "Trajan Pro", Georgia, serif;
 }
 
 /**

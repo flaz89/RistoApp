@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Baloo_2, JetBrains_Mono, Manrope } from "next/font/google";
+import { Baloo_2, Cinzel, JetBrains_Mono, Manrope } from "next/font/google";
 
 import "./globals.css";
 
@@ -33,6 +33,15 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+// Roman inscriptional capitals (drawn after the Trajan's Column lettering):
+// only for the Roman numerals of the "Come funziona" timeline.
+const cinzel = Cinzel({
+  variable: "--font-cinzel",
+  subsets: ["latin"],
+  weight: ["700"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   // `template` names every future page automatically: a page that sets
   // title 'Ristoranti' becomes 'Ristoranti · RistoApp' in the browser tab.
@@ -48,7 +57,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="it"
-      className={`${baloo.variable} ${manrope.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${baloo.variable} ${manrope.variable} ${jetbrainsMono.variable} ${cinzel.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

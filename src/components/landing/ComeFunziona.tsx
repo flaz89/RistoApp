@@ -3,7 +3,7 @@ import './come-funziona.css';
 /**
  * Sezione "come funziona" — 3 step affiancati. Montata da Pillars.tsx dentro
  * .pillars__blast una volta che logo+scritta hanno finito di scorrere via
- * (vedi showComeFunziona/tailProgress lì). Position:absolute e z-index sono
+ * (vedi showComeFunziona/tailProgress lì). Position (fixed) e z-index sono
  * suoi (non imposti dal chiamante, vedi come-funziona.css) così la sezione
  * resta autonoma per quando in futuro uscirà dal blast per una sezione
  * vera propria.
@@ -21,15 +21,33 @@ import './come-funziona.css';
 // (vedi .pillars__blast-logo in pillars.css). Da sostituire con le icone
 // vere dei tre passi quando arrivano.
 const STEPS = [
-  { n: 'Step I', title: 'Trovi', icon: '/brand/occasione.svg', text: 'Apri la mappa e vedi cosa c’è di fresco intorno a te, adesso.' },
-  { n: 'Step II', title: 'Ordini', icon: '/brand/negozio.svg', text: 'Scegli dal banco del negozio e paghi dal telefono, in un tocco.' },
-  { n: 'Step III', title: 'Ritiri', icon: '/brand/tavolo.svg', text: 'Ti avvisano quando è pronto: passi, ritiri, sei già fuori.' },
+  { n: 'I', title: 'Trova', icon: '/brand/trova.svg', sub: '"Vedi cosa c\'è, adesso."', text: 'La mappa del quartiere si aggiorna in tempo reale: cosa è pronto, cosa sta per finire, a due passi da te.' },
+  { n: 'II', title: 'Scegli', icon: '/brand/scegli.svg', sub: '"Un tocco, è tuo."', text: 'Pre-ordina dal fornaio o prendi al volo un\'occasione dal fruttivendolo. Paghi dal telefono, niente fila alla cassa.' },
+  { n: 'III', title: 'Vivi', icon: '/brand/tavolo.svg', sub: '"Passa, ritira, vai."', text: 'Ti avvisano quando è pronto: entri, esci, il quartiere lo vivi invece di aspettarlo.' },
 ];
 
 export default function ComeFunziona() {
   return (
     <div className="come-funziona">
       {/* <h2 className="come-funziona__heading">Come funziona</h2> */}
+      {/* Indicatore di progresso: su mobile gli step sono uno alla volta, quindi
+          senza questo l'utente non sa quanti passi ci siano né dove si trova.
+          Guidato da --cf come il resto (vedi .come-funziona__progress in
+          come-funziona.css). aria-hidden apposta: è orientamento visivo, e ai
+          reader i 3 step restano tutti leggibili in sequenza nell'<ol> sotto —
+          un aria-current qui sarebbe falso (il componente non ha stato per
+          aggiornarlo, vedi l'intestazione del file). */}
+      <ol className="come-funziona__progress" aria-hidden="true">
+        {STEPS.map((s, i) => (
+          <li
+            key={s.n}
+            className="come-funziona__progress-step"
+            style={{ '--i': i } as React.CSSProperties}
+          >
+            {s.n}
+          </li>
+        ))}
+      </ol>
       <ol className="come-funziona__steps">
         {STEPS.map((s, i) => (
           // --i: indice dello step, è quello che sfalsa il reveal in CSS.
@@ -38,10 +56,14 @@ export default function ComeFunziona() {
             className="come-funziona__step"
             style={{ '--i': i } as React.CSSProperties}
           >
-            <span className="come-funziona__step-n">{s.n}</span>
             {/* eslint-disable-next-line @next/next/no-img-element -- static asset, next/image è overkill qui (stessa scelta di Pillars.tsx) */}
             <img src={s.icon} alt="" aria-hidden="true" className="come-funziona__step-icon" />
+            {/* After the icon, not before: on desktop this is the medallion
+                sitting on the timeline, which runs between icons and titles
+                (the rail itself is drawn by .come-funziona__steps in CSS). */}
+            <span className="come-funziona__step-n">{s.n}</span>
             <h3 className="come-funziona__step-title">{s.title}</h3>
+            <p className="come-funziona__step-sub">{s.sub}</p>
             <p className="come-funziona__step-text">{s.text}</p>
           </li>
         ))}

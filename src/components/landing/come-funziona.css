@@ -46,64 +46,88 @@
   text-align: center;
 }
 
+/* Indicatore di progresso: solo mobile (riattivato nel media query in coda) —
+   su desktop i 3 step sono già tutti a video, l'orientamento è intrinseco. */
+.come-funziona__progress {
+  display: none;
+}
+
 .come-funziona__steps {
   margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
-  gap: clamp(16px, 4vw, 48px);
+  /* Vars, not literals: the timeline (desktop block below) has to find the
+     column centres (gap) and run exactly through the medallions (icon-h,
+     med, med-top). */
+  --gap: clamp(16px, 4vw, 48px);
+  --icon-h: clamp(96px, 11vw, 160px);
+  --med: 44px;
+  --med-top: clamp(24px, 4vh, 48px); /* icon → tile breathing room */
+  gap: var(--gap);
   width: 100%;
   max-width: 1100px;
   align-items: start;
 }
 
 /*
- * Reveal sfalsato guidato dallo scroll: --cf (0→1) è impostata da
- * Pillars.tsx su .pillars__blast ad ogni frame, --i è l'indice dello step
- * (inline nel TSX). Ogni step consuma 0.2 di corsia partendo da i*0.2,
- * quindi l'ultimo è dentro a --cf 0.6: il resto della corsia resta come
- * margine, così nessuno step dipende dall'ultimo pixel scrollabile della
- * pagina (era esattamente il bug del reveal precedente).
- *
- * Niente transition: --t è già una funzione continua dello scroll, esattamente
- * come lo slide di .pillars__blast-content — animarla sopra la sfaserebbe
- * dallo scroll invece di seguirlo. Per lo stesso motivo non serve un
- * fallback prefers-reduced-motion: senza scroll dell'utente non si muove nulla.
+ * Scroll-driven reveal: --cf (0→1) is set every frame by Pillars.tsx on
+ * .pillars__blast, --i is the step index (inline in the TSX). Each layout
+ * (desktop/mobile media queries below) derives its own timing from those
+ * two. No transitions: --cf is already a continuous function of scroll, and
+ * easing on top would make it lag behind the scroll instead of following
+ * it. Same reason there's no prefers-reduced-motion fallback: nothing moves
+ * unless the user scrolls.
  */
 .come-funziona__step {
-  /* --u: "tempo" dello step, non clampato — 0 quando tocca a lui entrare, 1
-     quando è pieno, e oltre 1 mentre il successivo sta entrando (serve alla
-     variante mobile qui sotto per farlo uscire). Passo 0.25 di corsia a
-     testa: l'ultimo è dentro a --cf 0.75, il resto resta margine.
-     --in: la sola fase di ingresso, 0→1. */
-  --u: calc((var(--cf, 0) - var(--i) * 0.25) / 0.25);
-  /* L'ingresso consuma solo la prima frazione (0.4) dello slot, non tutto:
-     il resto è pausa a piena opacità, altrimenti lo step arriva a 1 e
-     riparte subito a uscire — che è quello che li faceva sembrare
-     sovrapposti. Stessa frazione per l'uscita mobile, così il crossfade
-     con il successivo resta simmetrico. */
-  --in: clamp(0, calc(var(--u) / 0.4), 1);
   flex: 1;
-  opacity: var(--in);
-  transform: translateY(calc((1 - var(--in)) * 32px));
+  /* Every column hangs from its medallion, so it reads along its centre. */
+  text-align: center;
+  /* 0→1: has the timeline reached this step's medallion yet? Desktop
+     derives it from scroll; mobile keeps this 1, since the step on screen is
+     by definition the current one. */
+  --hit: 1;
 }
 
+/*
+ * Medallion: the Roman numeral in a rounded tile on the timeline. Cinzel
+ * (Trajan's Column capitals) is what makes it read "Roman/historic" rather
+ * than just "numbered". Unreached: cream outline on orange. Reached: filled
+ * charcoal with an orange numeral. The orange fill is not decoration — the
+ * tile sits on the rail and has to hide it.
+ */
 .come-funziona__step-n {
-  display: block;
-  font-family: var(--font-mono); /* stessa resa delle altre etichette-codice della landing (.pillars__pillar-label, hero) */
-  font-weight: 400;
-  font-size: clamp(18px, 5vw, 24px);
+  position: relative;
+  z-index: 1; /* above the rail pseudo-elements of .come-funziona__steps */
+  display: grid;
+  place-items: center;
+  width: var(--med);
+  height: var(--med);
+  margin: var(--med-top) auto 0;
+  border: 1.5px solid var(--color-warm);
+  /* iOS app-icon shape: ~22.5% of the side is the radius Apple's icon
+     grid approximates with a plain border-radius (the real one is a
+     continuous-curvature squircle, close enough at 44px). */
+  border-radius: 22.5%;
+  font-family: var(--font-roman);
+  font-weight: 700;
+  font-size: 17px;
   line-height: 1;
-  opacity: 0.55;
+  letter-spacing: 0.04em;
+  /* Reached: the landing's usual charcoal, border included, with the numeral
+     in the background orange — as if punched through the tile. */
+  border-color: color-mix(in srgb, var(--color-screen-2) calc(var(--hit) * 100%), var(--color-warm));
+  background: color-mix(in srgb, var(--color-screen-2) calc(var(--hit) * 100%), var(--color-accent-2));
+  color: color-mix(in srgb, var(--color-accent-2) calc(var(--hit) * 100%), var(--color-warm));
 }
 
 /* Altezza fissa (non auto): le 3 brand SVG hanno viewBox diversi, senza
    questo i titoli non si allineerebbero fra loro sulla riga desktop. */
 .come-funziona__step-icon {
   display: block;
-  height: clamp(200px, 7vw, 184px);
+  height: var(--icon-h);
   width: auto;
-  margin-top: 0.35em;
+  margin: 0 auto; /* display:block, text-align doesn't centre it */
 }
 
 .come-funziona__step-title {
@@ -114,13 +138,103 @@
   font-size: clamp(25px, 2.4vw, 38px);
 }
 
+/* Occhiello sotto il titolo: stessa scala/leading del testo dello step, in
+   corsivo — è una glossa del titolo, non un secondo paragrafo di copy. */
+.come-funziona__step-sub {
+  margin: 0 0 0.5em;
+  font-size: clamp(14px, 1.5vw, 18px);
+  line-height: 1.5;
+  font-style: italic;
+}
+
 .come-funziona__step-text {
   margin: 0;
   font-size: clamp(14px, 1.5vw, 18px);
   line-height: 1.5;
 }
 
-/* Sotto il tablet i 3 step non stanno affiancati leggibili: impilati. */
+/*
+ * DESKTOP — timeline. A straight rail runs under the three icons, drawn as
+ * a double rule (the framing lines of a carved inscription). A solid bar
+ * fills it with scroll from medallion I (start) through II (middle) to III
+ * (end). Reaching a medallion lights it up — it grows and flips to cream —
+ * and raises that step: the icon emerges upward from the rail, then the
+ * words appear.
+ *
+ * All timing is in --cf: the bar starts at 0.05 and takes 0.6 to cross, so
+ * it reaches medallion i at 0.05 + 0.3·i (0.05, 0.35, 0.65). The last step
+ * finishes its reveal at ~0.81: the rest of the runway is margin, so
+ * nothing depends on the very last scrollable pixel of the page (the bug of
+ * the first reveal).
+ */
+@media (min-width: 820px) {
+  .come-funziona__steps {
+    position: relative; /* containing block for the rail */
+    --line: clamp(0, calc((var(--cf, 0) - 0.05) / 0.6), 1);
+    /* Column width: medallions sit at column centres, i.e. col/2 in from
+       each side. % resolves on the rail, whose containing block is this. */
+    --col: calc((100% - 2 * var(--gap)) / 3);
+    /* Vertical centre of the medallions = where the rail runs. */
+    --rail-y: calc(var(--icon-h) + var(--med-top) + var(--med) / 2);
+  }
+  /* Track: the whole timeline, dim, visible from the start — the reader
+     sees the journey (and its 3 stops) before walking it. */
+  .come-funziona__steps::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(var(--rail-y) - 4px);
+    height: 8px;
+    box-sizing: border-box;
+    border-block: 1px solid var(--color-warm);
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  /* Progress bar: only between medallion I and III (the column centres),
+     scaled rather than resized so it stays a cheap compositor transform. */
+  .come-funziona__steps::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--col) / 2);
+    right: calc(var(--col) / 2);
+    top: calc(var(--rail-y) - 1.5px);
+    height: 3px;
+    background: var(--color-warm);
+    transform: scaleX(var(--line));
+    transform-origin: left;
+    pointer-events: none;
+  }
+
+  .come-funziona__step {
+    /* --t: --cf elapsed since the bar reached this step's medallion. */
+    --t: calc(var(--cf, 0) - 0.05 - 0.3 * var(--i));
+    /* Short (0.03): lighting up is an event, not a slow fade. */
+    --hit: clamp(0, calc(var(--t) / 0.03), 1);
+    --icon-in: clamp(0, calc(var(--t) / 0.12), 1);
+    /* Text trails the icon: the picture comes first, then the words. */
+    --text-in: clamp(0, calc((var(--t) - 0.04) / 0.12), 1);
+  }
+  .come-funziona__step-n {
+    transform: scale(calc(1 + 0.3 * var(--hit)));
+  }
+  /* Clipped from the top: the icon rises out of the rail it stands on. */
+  .come-funziona__step-icon {
+    clip-path: inset(calc((1 - var(--icon-in)) * 100%) 0 0 0);
+  }
+  .come-funziona__step-title,
+  .come-funziona__step-sub,
+  .come-funziona__step-text {
+    opacity: var(--text-in);
+    transform: translateY(calc((1 - var(--text-in)) * 16px));
+  }
+}
+
+/* Sotto il tablet i 3 step non stanno affiancati leggibili: deck push-up —
+   uno alla volta al centro dello schermo, il precedente esce verso l'alto
+   mentre il successivo entra da sotto. Stessa direzione dello slide-via di
+   logo+scritta sopra (translateY negativo): in questa sezione tutto scorre
+   verso l'alto, gli step continuano quel gesto invece di incrociarlo. */
 @media (max-width: 819px) {
   /*
    * Non una colonna di 3: impilati in flow occupavano più di 100dvh e
@@ -133,38 +247,71 @@
     display: block;
     position: relative;
     flex: 1;
+    /* One step on screen at a time: room for big icons. This is what the
+       old clamp(200px, 7vw, 184px) always resolved to (min > max). */
+    --icon-h: 200px;
   }
   /*
-   * --out: fase di uscita, 0→1 mentre lo step SUCCESSIVO fa il suo ingresso
-   * (--u da 1 a 2 coincide con --in del successivo da 0 a 1) — è questo che
-   * rende il cambio un crossfade e non due animazioni scollegate.
-   * Sull'ultimo resta 0: non ha un successore che lo sostituisca, quindi
-   * deve restare a video fino in fondo alla corsia.
+   * Matematica MOBILE, ridefinisce --u/--in del desktop (slot 0.25 / ingresso
+   * sul 40%): con quella ogni step restava al centro per ~15dvh di scroll —
+   * troppo poco per leggere icona+titolo+testo. Qui:
+   *   SLOT = 0.4 → distanza fra l'inizio dell'ingresso e quello del successivo
+   *   ENTRY = 0.2 → quanta --cf consuma un ingresso (l'ultimo finisce
+   *                 ESATTAMENTE a 1: niente corsia morta, la coda della
+   *                 sezione diventa dwell sul passo III)
+   * Dwell per step = SLOT - ENTRY = 0.2 di --cf (~20dvh con REVEAL_VH=100 in
+   * Pillars.tsx). Per allungarlo: ENTRY più piccolo (slide più rapido) o
+   * REVEAL_VH più grande — i due sono accoppiati, dwell ≈ (SLOT - ENTRY) ×
+   * REVEAL_VH.
    */
   .come-funziona__step {
+    --u: calc((var(--cf, 0) - var(--i) * 0.4) / 0.2);
+    /* Ingresso 0→1 sull'intero ENTRY (a differenza del desktop, che ne usa solo il 40%). */
+    --in: clamp(0, var(--u), 1);
+    /* Uscita 0→1 mentre lo step SUCCESSIVO fa il suo ingresso (--u da 2 a 3
+       coincide con --in del successivo da 0 a 1): è questo che rende il
+       cambio un push e non due animazioni scollegate. Sull'ultimo resta 0:
+       non ha un successore, deve restare a video fino in fondo alla corsia. */
     --out: 0;
+    /* L'opacità ammorbidisce solo i bordi del viaggio (primi/ultimi ~35%):
+       con 40vh di spostamento la card è già quasi fuori schermo quando
+       sfuma — si legge come slide, non crossfade. */
+    --op-in: clamp(0, calc(var(--u) / 0.35), 1);
+    --op-out: 0;
     position: absolute;
     top: 50%;
     left: 0;
     right: 0;
-    opacity: calc(var(--in) - var(--out));
-    /* -50% centra, il resto è il viaggio: entra da 15vh sotto il centro,
-       esce a 15vh sopra. */
-    transform: translateY(calc(-50% + (1 - var(--in) - var(--out)) * 15vh));
+    opacity: min(var(--op-in), calc(1 - var(--op-out)));
+    /* -50% centra, il resto è il viaggio: entra da 40vh sotto il centro,
+       esce a 40vh sopra. */
+    transform: translateY(calc(-50% + (1 - var(--in)) * 40vh - var(--out) * 40vh));
   }
   .come-funziona__step:not(:last-child) {
-    --out: clamp(0, calc((var(--u) - 1) / 0.4), 1);
+    --out: clamp(0, calc(var(--u) - 2), 1);
+    --op-out: clamp(0, calc((var(--u) - 2.65) / 0.35), 1);
   }
-  /* Impilati, l'asse di lettura è il centro della colonna, non il bordo
-     sinistro: icona/titolo/testo si allineano lì. Il numerale no, resta
-     ancorato a sinistra come indice della sequenza. */
-  .come-funziona__step {
-    text-align: center;
+
+  /* Indicatore di progresso in alto: ogni numerale si accende quando il suo
+     step entra (--in a 1) e resta acceso finché non esce — sempre chiaro
+     quanti passi ci sono e dove sei. */
+  .come-funziona__progress {
+    position: absolute;
+    top: clamp(20px, 4vh, 40px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-roman); /* same numerals as the medallions */
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    color: var(--color-screen-2);
   }
-  .come-funziona__step-n {
-    text-align: left;
-  }
-  .come-funziona__step-icon {
-    margin-inline: auto; /* è display:block, text-align non lo sposta */
+  .come-funziona__progress-step {
+    opacity: calc(0.35 + 0.65 * clamp(0, calc((var(--cf, 0) - var(--i) * 0.4) / 0.2), 1));
   }
 }

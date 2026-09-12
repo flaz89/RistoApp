@@ -1,0 +1,117 @@
+/*
+ * Manifesto (landing v2) — section 5.
+ *
+ * Palette: the usual warm charcoal ground (#2E2B28 — same ink as Hero and
+ * LiveMap, scoped there so not reusable as a token), a calm dark beat right
+ * after the orange blast. Ink is the warm cream (--color-warm), never white.
+ *
+ * z-index:11 + opaque background + min-height:100dvh: the section scrolls up
+ * over the pinned OCCASIONI blast (fixed, z-index:10) and covers it — this is
+ * the blast's "overlay release". See the doc comment in Manifesto.tsx.
+ */
+.manifesto {
+  --m-ink:   var(--color-warm); /* headline / strong ink: warm cream, not white */
+  --m-ink-2: color-mix(in srgb, var(--color-warm) 78%, #2E2B28); /* body ink: same cream, stepped back */
+  position: relative;
+  z-index: 11;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  background: #2E2B28;
+  color: var(--m-ink);
+  overflow: hidden; /* contains the from-the-right entrance (translateX) — no horizontal scroll */
+}
+
+.manifesto__inner {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(56px, 9vw, 120px) clamp(20px, 6vw, 48px);
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: clamp(32px, 6vw, 88px);
+  align-items: center;
+}
+
+/* The mark: the vertical Curius lockup, still on the left while the words
+   arrive from the right — the "messenger" carrying the text in. Swap the
+   src for the bare amphora monogram when it's exported. */
+.manifesto__mark {
+  display: block;
+  width: 100%;
+  max-width: clamp(190px, 26vw, 340px);
+  height: auto;
+  justify-self: center;
+}
+
+.manifesto__text { max-width: 34ch; }
+
+.manifesto__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--color-accent-2);
+  margin-bottom: clamp(16px, 2vw, 24px);
+}
+
+.manifesto__title {
+  margin: 0 0 clamp(16px, 2.4vw, 28px);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(38px, 6vw, 72px);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--m-ink);
+}
+
+.manifesto__body {
+  margin: 0 0 clamp(24px, 3vw, 36px);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: clamp(16px, 1.4vw, 19px);
+  line-height: 1.6;
+  color: var(--m-ink-2);
+}
+
+.manifesto__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--m-ink);
+  text-decoration: none;
+}
+.manifesto__link svg { width: 18px; height: 18px; transition: transform 0.2s ease; }
+.manifesto__link:hover svg { transform: translateX(4px); }
+
+/* Mobile: stack, mark above the words, both left-aligned. */
+@media (max-width: 819px) {
+  .manifesto__inner { grid-template-columns: 1fr; gap: clamp(24px, 8vw, 40px); }
+  .manifesto__mark { max-width: 150px; justify-self: start; }
+  .manifesto__text { max-width: none; }
+}
+
+/* Entrance from the right — scroll-driven, native, no JS. Where
+   animation-timeline is unsupported the block just stays static and visible
+   (the default state below the keyframes' "to"), which is the correct
+   fallback. Reduced-motion opts out entirely. */
+@keyframes manifesto-in {
+  from { opacity: 0; transform: translateX(48px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@supports (animation-timeline: view()) {
+  .manifesto__text {
+    animation: manifesto-in linear both;
+    animation-timeline: view();
+    animation-range: entry 5% cover 40%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .manifesto__text { animation: none; }
+}

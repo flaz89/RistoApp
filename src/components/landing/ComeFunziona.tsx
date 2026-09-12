@@ -23,25 +23,23 @@ import './come-funziona.css';
 const STEPS = [
   { n: 'I', title: 'Trova', icon: '/brand/trova.svg', sub: '"Vedi cosa c\'è, adesso."', text: 'La mappa del quartiere si aggiorna in tempo reale: cosa è pronto, cosa sta per finire, a due passi da te.' },
   { n: 'II', title: 'Scegli', icon: '/brand/scegli.svg', sub: '"Un tocco, è tuo."', text: 'Pre-ordina dal fornaio o prendi al volo un\'occasione dal fruttivendolo. Paghi dal telefono, niente fila alla cassa.' },
-  { n: 'III', title: 'Vivi', icon: '/brand/tavolo.svg', sub: '"Passa, ritira, vai."', text: 'Ti avvisano quando è pronto: entri, esci, il quartiere lo vivi invece di aspettarlo.' },
+  { n: 'III', title: 'Vivi', icon: '/brand/vivi.svg', sub: '"Passa, ritira, vai."', text: 'Ti avvisano quando è pronto: entri, esci, il quartiere lo vivi invece di aspettarlo.' },
 ];
 
 export default function ComeFunziona() {
   return (
     <div className="come-funziona">
       {/* <h2 className="come-funziona__heading">Come funziona</h2> */}
-      {/* Indicatore di progresso: su mobile gli step sono uno alla volta, quindi
-          senza questo l'utente non sa quanti passi ci siano né dove si trova.
-          Guidato da --cf come il resto (vedi .come-funziona__progress in
-          come-funziona.css). aria-hidden apposta: è orientamento visivo, e ai
-          reader i 3 step restano tutti leggibili in sequenza nell'<ol> sotto —
-          un aria-current qui sarebbe falso (il componente non ha stato per
-          aggiornarlo, vedi l'intestazione del file). */}
-      <ol className="come-funziona__progress" aria-hidden="true">
+      {/* Medaglioni della guida verticale (solo mobile, vedi come-funziona.css):
+          sono fuori dalle card perché le card si muovono e questi no — un
+          .come-funziona__step-n dentro la card seguirebbe la sua transform
+          invece di restare sulla linea. aria-hidden: orientamento visivo, i
+          numerali restano leggibili nell'<ol> degli step qui sotto. */}
+      <ol className="come-funziona__rail" aria-hidden="true">
         {STEPS.map((s, i) => (
           <li
             key={s.n}
-            className="come-funziona__progress-step"
+            className="come-funziona__step-n come-funziona__rail-n"
             style={{ '--i': i } as React.CSSProperties}
           >
             {s.n}

@@ -46,9 +46,9 @@
   text-align: center;
 }
 
-/* Indicatore di progresso: solo mobile (riattivato nel media query in coda) —
-   su desktop i 3 step sono già tutti a video, l'orientamento è intrinseco. */
-.come-funziona__progress {
+/* Medaglioni sulla guida: layout solo mobile (vedi media query in coda) —
+   su desktop i medaglioni sono quelli dentro le colonne, sulla riga. */
+.come-funziona__rail {
   display: none;
 }
 
@@ -236,6 +236,43 @@
    logo+scritta sopra (translateY negativo): in questa sezione tutto scorre
    verso l'alto, gli step continuano quel gesto invece di incrociarlo. */
 @media (max-width: 819px) {
+  /* Geometria della guida verticale, condivisa fra la linea (pseudo-elementi
+     di .come-funziona__steps) e i medaglioni (.come-funziona__rail): due
+     elementi diversi che devono stare sulla STESSA riga, quindi le misure
+     vivono sul loro antenato comune. */
+  .come-funziona {
+    --rail-x-shared: clamp(16px, 5vw, 30px); /* distanza della guida dal bordo sinistro */
+    --rail-w-shared: 5px;   /* più stretta del desktop (8px): qui è un accento laterale, non l'asse della sezione */
+    --rail-gap-shared: var(--pattern-h); /* respiro fra le estremità della guida e le fasce di pattern */
+    /* Estremi della linea: da qui i medaglioni ricavano inizio/metà/fine. */
+    --rail-top: calc(var(--pattern-h, 0px) + var(--rail-gap-shared));
+    --rail-len: calc(100dvh - 2 * var(--rail-top));
+  }
+
+  /* Medaglioni ancorati alla linea a 0 / 50% / 100% (--i 0,1,2). fixed come
+     la linea: stesso sistema di riferimento, così restano fermi mentre le
+     card scorrono. Si accendono quando la barra li raggiunge — stessi
+     istanti di --line (0.1 + 0.4·i). */
+  .come-funziona__rail {
+    display: block;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    --med: 30px; /* più piccoli dei 44px desktop */
+  }
+  .come-funziona__rail-n {
+    position: fixed;
+    left: calc(var(--rail-x-shared) + var(--rail-w-shared) / 2);
+    top: calc(var(--rail-top) + var(--rail-len) * var(--i) / 2);
+    margin: 0;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    --hit: clamp(0, calc((var(--cf, 0) - 0.1 - 0.4 * var(--i)) / 0.03), 1);
+  }
+  /* Il medaglione dentro la card diventa un doppione della guida. */
+  .come-funziona__step .come-funziona__step-n {
+    display: none;
+  }
   /*
    * Non una colonna di 3: impilati in flow occupavano più di 100dvh e
    * venivano tagliati. Qui gli step sono SOVRAPPOSTI al centro dello
@@ -247,6 +284,15 @@
     display: block;
     position: relative;
     flex: 1;
+    /* Stessa timeline del desktop, ruotata: la barra raggiunge il punto
+       dello step i a METÀ del suo ingresso (--cf = i*0.4 + 0.1), quindi
+       0.1 / 0.5 / 0.9. Non all'arrivo al centro (0.2/0.6/1.0): l'ultimo
+       cadrebbe sull'ultimo pixel della corsia, e il terzo medaglione non
+       arriverebbe mai al colore pieno. */
+    --line: clamp(0, calc((var(--cf, 0) - 0.1) / 0.8), 1);
+    --rail-x: var(--rail-x-shared);
+    --rail-w: var(--rail-w-shared);
+    --rail-gap: var(--rail-gap-shared);
     /* One step on screen at a time: room for big icons. This is what the
        old clamp(200px, 7vw, 184px) always resolved to (min > max). */
     --icon-h: 200px;
@@ -264,6 +310,38 @@
    * REVEAL_VH più grande — i due sono accoppiati, dwell ≈ (SLOT - ENTRY) ×
    * REVEAL_VH.
    */
+  /* Guida verticale (doppio filo, come le linee di incorniciatura di
+     un'iscrizione) e barra che la riempie scendendo con lo scroll: stessa
+     coppia track/progress del desktop, solo ruotata di 90°. */
+  .come-funziona__steps::before,
+  .come-funziona__steps::after {
+    content: '';
+    /* fixed, non absolute: la guida deve correre fra le due fasce di
+       pattern, ancorate al viewport (pillars.css), non fra i bordi di questa
+       lista — che è alta quanto il flusso le concede. --pattern-h arriva in
+       eredità da .pillars__blast. */
+    position: fixed;
+    left: var(--rail-x);
+    top: calc(var(--pattern-h, 0px) + var(--rail-gap));
+    bottom: calc(var(--pattern-h, 0px) + var(--rail-gap));
+    pointer-events: none;
+  }
+  .come-funziona__steps::before {
+    width: var(--rail-w);
+    box-sizing: border-box;
+    border-inline: 1px solid var(--color-warm);
+    opacity: 0.4;
+  }
+  .come-funziona__steps::after {
+    left: calc(var(--rail-x) + (var(--rail-w) - 2px) / 2);
+    width: 2px;
+    background: var(--color-warm);
+    /* scaleY invece di height: resta una transform da compositor, come il
+       fratello desktop. */
+    transform: scaleY(var(--line));
+    transform-origin: top;
+  }
+
   .come-funziona__step {
     --u: calc((var(--cf, 0) - var(--i) * 0.4) / 0.2);
     /* Ingresso 0→1 sull'intero ENTRY (a differenza del desktop, che ne usa solo il 40%). */
@@ -280,8 +358,10 @@
     --op-out: 0;
     position: absolute;
     top: 50%;
-    left: 0;
-    right: 0;
+    /* Simmetrico apposta: sgombra la guida a sinistra senza spostare il
+       centro ottico della card. */
+    left: calc(var(--rail-x) + var(--rail-w) + 12px);
+    right: calc(var(--rail-x) + var(--rail-w) + 12px);
     opacity: min(var(--op-in), calc(1 - var(--op-out)));
     /* -50% centra, il resto è il viaggio: entra da 40vh sotto il centro,
        esce a 40vh sopra. */
@@ -290,28 +370,5 @@
   .come-funziona__step:not(:last-child) {
     --out: clamp(0, calc(var(--u) - 2), 1);
     --op-out: clamp(0, calc((var(--u) - 2.65) / 0.35), 1);
-  }
-
-  /* Indicatore di progresso in alto: ogni numerale si accende quando il suo
-     step entra (--in a 1) e resta acceso finché non esce — sempre chiaro
-     quanti passi ci sono e dove sei. */
-  .come-funziona__progress {
-    position: absolute;
-    top: clamp(20px, 4vh, 40px);
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 18px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    font-family: var(--font-roman); /* same numerals as the medallions */
-    font-weight: 700;
-    font-size: 14px;
-    letter-spacing: 0.05em;
-    color: var(--color-screen-2);
-  }
-  .come-funziona__progress-step {
-    opacity: calc(0.35 + 0.65 * clamp(0, calc((var(--cf, 0) - var(--i) * 0.4) / 0.2), 1));
   }
 }

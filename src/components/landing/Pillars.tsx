@@ -260,6 +260,12 @@ export default function Pillars() {
         blastContentEl.style.transform = `translateY(${tailProgress * -100}%)`;
         blastContentEl.style.opacity = `${1 - tailProgress}`;
       }
+      // Stesso tailProgress, esposto come CSS var: la fascia di pattern
+      // romano sale dal basso mentre logo+scritta escono dall'alto (vedi
+      // .pillars__blast-pattern in pillars.css). Var e non stile diretto
+      // perché qui l'unica cosa che cambia è una posizione, e il CSS sa già
+      // tradurla nella sua altezza senza che il JS debba misurarla.
+      blastRef.current?.style.setProperty('--tail', `${tailProgress}`);
       setShowComeFunziona(tailProgress >= CF_START);
 
       if (blastEl && dotEl) {
@@ -370,6 +376,12 @@ export default function Pillars() {
               blastEl: cambiano ad ogni frame di scroll, un re-render qui
               sarebbe sprecato) — fermi finché lo scroll resta bloccato
               (vedi lockedRef), poi seguono lo scroll una volta sbloccati. */}
+          {/* Fasce decorative ai bordi del viewport: entrano (dal basso e
+              dall'alto) mentre la scritta se ne va. Fuori da
+              .pillars__blast-content apposta — quello scorre via, queste
+              devono restare. */}
+          <div className="pillars__blast-pattern pillars__blast-pattern--top" />
+          <div className="pillars__blast-pattern" />
           <div className="pillars__blast-content" ref={blastContentRef}>
             <div className="pillars__blast-logo" />
             {/* Montata solo a espansione completa: è il mount a far partire

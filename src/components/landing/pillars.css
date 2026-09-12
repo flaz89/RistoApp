@@ -248,6 +248,13 @@
  * browser ridisegna il rettangolo arrotondato nitido a qualunque dimensione).
  */
 .pillars__blast {
+  /* Altezza delle due fasce di pattern. Vive qui, non su
+     .pillars__blast-pattern, perché così eredita ai discendenti: ComeFunziona
+     la usa per far finire la sua guida verticale esattamente dove comincia il
+     pattern (come-funziona.css). vw e non vh: "mobile" qui è schermo stretto,
+     non basso — con 12vh il ramo scelto era sempre quello centrale (su un
+     telefono 12vh ≈ 96px), quindi il minimo non mordeva mai. */
+  --pattern-h: clamp(70px, 7vw, 100px);
   position: fixed;
   z-index: 10; /* landing v2 non ha header/nav fixed, più di .hero__inner (z-index:4, hero.css) basta */
   background: var(--color-accent-2);
@@ -271,6 +278,49 @@
  * timer che parte da solo. Per questo qui non serve un fallback
  * prefers-reduced-motion: senza scroll dell'utente non si muove nulla, di suo.
  */
+/*
+ * Fascia di pattern romano ancorata ai bordi del viewport (base + cornice
+ * in cima, modificatore --top), ripetuta per tutta la larghezza. Guidata da
+ * --tail (0→1, impostata da Pillars.tsx sul blast ad ogni frame): a 0 le
+ * fasce sono interamente fuori schermo, a 1 sono appoggiate ai rispettivi
+ * bordi — entrano mentre logo+scritta escono verso l'alto.
+ *
+ * fixed, non absolute: il blast a espansione piena è molto più largo del
+ * viewport, quindi da absolute la fascia si estenderebbe oltre lo schermo
+ * (stesso motivo di .come-funziona, vedi come-funziona.css). Fixed la ancora
+ * al viewport e la sottrae anche all'overflow:hidden del blast.
+ *
+ * mask + background invece di <img>/background-image: l'SVG è bianco e qui
+ * il fondo è l'arancio del blast — la maschera lo ritinge di crema, stessa
+ * tecnica di .pillars__blast-logo (e stesso vincolo: serve http, non file://).
+ */
+.pillars__blast-pattern {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--pattern-h);
+  z-index: 2; /* sopra .come-funziona (z-index:1), che ha i suoi margini */
+  background: #C55E00;
+  /* auto 100%: l'altezza la detta la fascia, la larghezza segue il rapporto
+     nativo del viewBox (800x290) e si ripete fino a coprire il vw. */
+  -webkit-mask: url(/brand/roman-pattern.svg) bottom left / auto 100% repeat-x;
+          mask: url(/brand/roman-pattern.svg) bottom left / auto 100% repeat-x;
+  transform: translateY(calc((1 - var(--tail, 0)) * 100%));
+  pointer-events: none;
+}
+
+/* Stessa fascia specchiata in cima: scende dall'alto invece di salire.
+   scaleY(-1) invece di un secondo asset — il pattern è simmetrico solo in
+   orizzontale, ribaltarlo è ciò che lo fa leggere come cornice e non come
+   base incollata di sopra. L'ordine conta: scaleY prima, translateY dopo,
+   così lo spostamento resta nel verso dello schermo. */
+.pillars__blast-pattern--top {
+  top: 0;
+  bottom: auto;
+  transform: translateY(calc((1 - var(--tail, 0)) * -100%)) scaleY(-1);
+}
+
 .pillars__blast-content {
   position: absolute;
   inset: 0;

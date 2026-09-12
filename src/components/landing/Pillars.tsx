@@ -125,33 +125,10 @@ export default function Pillars() {
   // ComeFunziona sopra. Impostato ad ogni frame di scroll da tailProgress
   // (vedi sotto), non un evento — coerente con com'è guidato lo slide stesso.
   const [showComeFunziona, setShowComeFunziona] = useState(false);
-  // true quando la macchina da scrivere ha finito (onAnimationEnd sullo
-  // span, o subito con prefers-reduced-motion). Un ref, non stato: letto
-  // solo dentro updateActive e nel listener wheel/touch qui sotto (entrambi
-  // già closure su tutto il resto via ref) — un cambio non deve forzare un
-  // render a sé, e nel listener wheel/touch uno stato React sarebbe comunque
-  // stale (effetto con deps [], si attacca una volta sola).
-  const typedDoneRef = useRef(false);
-  // true mentre lo scroll è bloccato in attesa che la scritta finisca —
-  // vedi i listener wheel/touchmove più sotto, che lo leggono per decidere
-  // se chiamare preventDefault().
-  const lockedRef = useRef(false);
-  // Failsafe: se onAnimationEnd non scatta (osservato solo su desktop, con
-  // wheel/trackpad — su mobile/touch funziona; causa esatta non isolata
-  // senza un browser a disposizione) lo scroll resterebbe bloccato per
-  // sempre. Questo timer sblocca comunque, appena scaduta la durata nota
-  // dell'animazione (1.1s in pillars.css) + un margine — indipendente
-  // dall'evento, corregge il sintomo a prescindere dalla causa esatta.
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
-    // Calcolato una volta sola (non ha senso che cambi mentre si scrolla):
-    // con reduced-motion l'animazione della scritta è disattivata (vedi
-    // pillars.css), quindi il suo onAnimationEnd non scatterebbe mai — senza
-    // questo lo slide-via resterebbe bloccato per sempre in quel caso.
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // ponytail: scroll listener con rAF throttle, niente IntersectionObserver
     // né libreria — la sezione ha un'unica altezza nota (N * 100dvh) da cui
@@ -190,51 +167,16 @@ export default function Pillars() {
       // Calcolato FUORI dal guard qui sotto (non serve il DOM) così torna a
       // false anche quando il blast non è montato: è quello che fa ripartire
       // da capo la macchina da scrivere se si risale e si riscende.
-      const full = expand >= 1;
-      setBlastFull(full);
-      // Se si torna indietro prima di schermo pieno, azzera anche la fase
-      // successiva (scritta finita → slide) invece di lasciarla appesa:
-      // risalendo e riscendendo l'intera sequenza riparte da capo.
-      if (!full) {
-        typedDoneRef.current = false;
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
-          typingTimeoutRef.current = null;
-        }
-      } else if (prefersReducedMotion) {
-        // Nessuna animazione da aspettare: la scritta c'è già, tutta intera.
-        typedDoneRef.current = true;
-      } else if (typingTimeoutRef.current === null) {
-        // Schermo pieno, non reduced-motion, timer di failsafe non ancora
-        // armato per questo tratto — vedi il commento su typingTimeoutRef.
-        typingTimeoutRef.current = setTimeout(() => {
-          typedDoneRef.current = true;
-          lockedRef.current = false;
-          typingTimeoutRef.current = null;
-        }, 1300);
-      }
-      // Bloccato: schermo pieno ma la scritta non ha ancora finito. I
-      // listener wheel/touchmove più sotto lo leggono per impedire lo
-      // scroll — non solo "clampare" tailProgress a 0 come prima: qui lo
-      // scroll dell'utente proprio non avanza, quindi non c'è nulla da
-      // recuperare di scatto quando si sblocca (a differenza del giro
-      // precedente con updateActiveRef, che serviva a rincorrere uno scroll
-      // che nel frattempo era comunque andato avanti).
-      lockedRef.current = full && !typedDoneRef.current;
+      setBlastFull(expand >= 1);
 
       // Slide-via di logo+scritta: 0→1 nel budget dedicato SLIDE_VH, scroll
-      // OLTRE switchRunway (non un timer CSS: segue lo scroll dell'utente
-      // frame per frame, avanti e indietro). Gate esplicito su typedDoneRef,
-      // non ci si affida solo a lockedRef: il lock si aggiorna dentro
-      // updateActive, che parte un frame DOPO l'evento wheel che il browser
-      // ha già applicato — con uno scroll a raffica alcuni eventi passano
-      // prima che lockedRef scatti, scrolledIntoSection corre avanti, e
-      // senza questo gate tailProgress lo rifletteva subito: logo+scritta
-      // sparivano (ancora a metà digitazione) e ComeFunziona compariva di
-      // scatto sopra.
+      // OLTRE switchRunway, guidato SOLO dallo scroll (lock rimosso): la
+      // macchina da scrivere parte al montaggio (blastFull) e chi scrolla
+      // veloce può tagliarla a metà — comportamento standard scroll-driven,
+      // senza mai rubare lo scroll all'utente.
       const slideRunwayPx = (SLIDE_VH / 100) * stageHeight;
       const scrolledPastSwitch = Math.max(0, scrolledIntoSection - switchRunway);
-      const tailProgress = idx === EXPAND_IDX && typedDoneRef.current
+      const tailProgress = idx === EXPAND_IDX
         ? Math.min(1, scrolledPastSwitch / slideRunwayPx)
         : 0;
       // Corsia di reveal dei 3 step di ComeFunziona: 0→1 sui REVEAL_VH che
@@ -321,35 +263,13 @@ export default function Pillars() {
       ticking = true;
       requestAnimationFrame(updateActive);
     };
-    // preventDefault blocca lo scroll reale mentre lockedRef è true (schermo
-    // pieno, scritta non ancora finita) — non solo un clamp visivo: senza
-    // questo lo scroll continuerebbe ad avanzare sotto, e la posizione
-    // "sarebbe già più avanti" quando la digitazione finisce (il problema
-    // che il giro precedente risolveva con un ricalcolo di scatto — qui non
-    // serve perché lo scroll non è mai potuto avanzare per davvero).
-    // { passive: false } è necessario per poter chiamare preventDefault: un
-    // listener passive lo ignorerebbe silenziosamente.
-    // ponytail: non intercetta scroll da tastiera (frecce/Space/PageDown) o
-    // trascinamento scrollbar — copre wheel e touch, che sono l'input reale
-    // su una landing page; aggiungere anche quelli se emerge un caso d'uso.
-    const onWheel = (e: WheelEvent) => {
-      if (lockedRef.current) e.preventDefault();
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      if (lockedRef.current) e.preventDefault();
-    };
 
     updateActive();
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
-    window.addEventListener('wheel', onWheel, { passive: false });
-    window.addEventListener('touchmove', onTouchMove, { passive: false });
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
-      window.removeEventListener('wheel', onWheel);
-      window.removeEventListener('touchmove', onTouchMove);
-      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
     };
   }, []);
 
@@ -374,8 +294,8 @@ export default function Pillars() {
           {/* Logo + scritta: transform/opacity impostati DIRETTAMENTE sul DOM
               da tailProgress nell'effetto qui sopra (stesso motivo di
               blastEl: cambiano ad ogni frame di scroll, un re-render qui
-              sarebbe sprecato) — fermi finché lo scroll resta bloccato
-              (vedi lockedRef), poi seguono lo scroll una volta sbloccati. */}
+              sarebbe sprecato) — seguono lo scroll dell'utente frame
+              per frame, avanti e indietro. */}
           {/* Fasce decorative ai bordi del viewport: entrano (dal basso e
               dall'alto) mentre la scritta se ne va. Fuori da
               .pillars__blast-content apposta — quello scorre via, queste
@@ -389,25 +309,7 @@ export default function Pillars() {
                 testo cambia, aggiornare il conteggio degli step lì. */}
             {blastFull && (
               <p className="pillars__blast-title">
-                <span
-                  className="pillars__blast-typed"
-                  onAnimationEnd={() => {
-                    typedDoneRef.current = true;
-                    // Sblocca SUBITO, non aspettare il prossimo giro di
-                    // updateActive: quello gira solo su scroll/resize, e
-                    // mentre è bloccato blocchiamo esattamente lo scroll che
-                    // lo farebbe ripartire — senza questa riga il lock non
-                    // si scioglierebbe mai (nessun evento arriva a
-                    // ricalcolarlo dopo che il blocco lo ferma).
-                    lockedRef.current = false;
-                    // Il failsafe non serve più per questo tratto: l'evento
-                    // è arrivato regolarmente.
-                    if (typingTimeoutRef.current) {
-                      clearTimeout(typingTimeoutRef.current);
-                      typingTimeoutRef.current = null;
-                    }
-                  }}
-                >
+                <span className="pillars__blast-typed">
                   Come funziona?
                 </span>
               </p>

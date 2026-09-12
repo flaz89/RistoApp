@@ -269,6 +269,18 @@
     font-size: 12px;
     --hit: clamp(0, calc((var(--cf, 0) - 0.1 - 0.4 * var(--i)) / 0.03), 1);
   }
+  /* Corpo testo: i clamp base sono tarati sulle 3 colonne desktop, e ai
+     minimi (25px / 14px) su mobile risultano piccoli — qui la card è sola in
+     mezzo allo schermo e può permettersi molto di più. In vw, così crescono
+     dal telefono al tablet. */
+  .come-funziona__step-title {
+    font-size: clamp(30px, 8.5vw, 46px);
+  }
+  .come-funziona__step-sub,
+  .come-funziona__step-text {
+    font-size: clamp(16px, 4.4vw, 22px);
+  }
+
   /* Il medaglione dentro la card diventa un doppione della guida. */
   .come-funziona__step .come-funziona__step-n {
     display: none;

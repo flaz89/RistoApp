@@ -1,7 +1,6 @@
 import Hero from '@/components/landing/Hero';
 import LiveMap from '@/components/landing/LiveMap';
 import Pillars from '@/components/landing/Pillars';
-import ScrollDebug from '@/components/debug/ScrollDebug'; // DEBUG: rimuovere
 
 /**
  * Landing v2 — ha sostituito la v1 su questo branch. La v1 resta
@@ -16,7 +15,6 @@ export default function LandingV2() {
       <Hero />
       <LiveMap />
       <Pillars />
-      <ScrollDebug /> {/* DEBUG: contatore di scroll, rimuovere */}
     </main>
   );
 }
